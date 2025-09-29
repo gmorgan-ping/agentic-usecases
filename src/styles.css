@@ -1,6 +1,10 @@
 /* Custom Styles for Interactive Demo */
 
 /* Global Styles */
+html {
+  overflow-anchor: auto;
+}
+
 html,
 body {
   height: 100%;
@@ -497,8 +501,15 @@ body {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Chat Container - Fixed Height and Scrollable */
+#chatContainer {
+  height: 70vh;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  scroll-behavior: smooth;
+}
+
 /* Smooth Transitions */
-#chatContainer,
 #swimlaneContainer {
   transition: all 0.3s ease;
 }

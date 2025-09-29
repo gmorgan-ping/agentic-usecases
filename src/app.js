@@ -8,6 +8,9 @@ class InteractiveDemo {
     this.currentMode = 'overview'; // 'overview', 'executive', 'sequence'
     this.animationInProgress = false;
     this.animationQueue = [];
+    this.renderedUntilStep = -1; // Track rendered chat messages
+    this.navigationDebounceTimer = null;
+    this.scrollRequest = null;
 
     this.init();
   }
@@ -150,6 +153,7 @@ class InteractiveDemo {
 
   startExecutiveMode() {
     this.currentMode = 'executive';
+    this.renderedUntilStep = -1; // Reset for new scenario
 
     // Show main content in executive mode
     document.getElementById('mainContent').style.display = 'flex';
@@ -161,7 +165,7 @@ class InteractiveDemo {
     document.getElementById('nextBtn').style.display = 'inline-block';
 
     this.renderProgressiveBreadcrumb();
-    this.renderChat();
+    this.renderChat(true); // Force rebuild for new scenario
     this.renderCurrentActivity();
     this.updateNavigationButtons();
   }
@@ -189,11 +193,18 @@ class InteractiveDemo {
       return;
     }
 
-    this.currentStep++;
-    this.renderProgressiveBreadcrumb();
-    this.renderChat();
-    this.renderCurrentActivity();
-    this.updateNavigationButtons();
+    this.debouncedNavigation(() => {
+      // Cancel any in-flight animations
+      if (this.animationInProgress) {
+        this.skipAnimation();
+      }
+      
+      this.currentStep++;
+      this.renderProgressiveBreadcrumb();
+      this.renderChat(); // Incremental render
+      this.renderCurrentActivity();
+      this.updateNavigationButtons();
+    });
   }
 
   prevStep() {
@@ -201,11 +212,18 @@ class InteractiveDemo {
       return;
     }
 
-    this.currentStep--;
-    this.renderProgressiveBreadcrumb();
-    this.renderChat();
-    this.renderCurrentActivity();
-    this.updateNavigationButtons();
+    this.debouncedNavigation(() => {
+      // Cancel any in-flight animations
+      if (this.animationInProgress) {
+        this.skipAnimation();
+      }
+      
+      this.currentStep--;
+      this.renderProgressiveBreadcrumb();
+      this.renderChat(true); // Force rebuild for backward navigation
+      this.renderCurrentActivity();
+      this.updateNavigationButtons();
+    });
   }
 
   // Animation utility methods
@@ -270,9 +288,14 @@ class InteractiveDemo {
     // Find the first step of the target phase
     const targetStep = this.currentScenario.timeline.findIndex(step => step.phase === phaseId);
     if (targetStep !== -1) {
+      // Cancel any in-flight animations
+      if (this.animationInProgress) {
+        this.skipAnimation();
+      }
+      
       this.currentStep = targetStep;
       this.renderProgressiveBreadcrumb();
-      this.renderChat();
+      this.renderChat(true); // Force rebuild for jumps
       this.renderCurrentActivity();
       this.updateNavigationButtons();
       this.scrollToCurrentStep();
@@ -389,33 +412,46 @@ class InteractiveDemo {
     });
   }
 
-  renderChat() {
+  renderChat(forceRebuild = false) {
     if (!this.currentScenario) return;
 
     document.getElementById('welcomeMessage').style.display = 'none';
     const chatContainer = document.getElementById('chatContainer');
 
-    // Clear existing messages
-    chatContainer.querySelectorAll('.chat-message').forEach(el => el.remove());
+    // Check if we need to detect scroll position before changes
+    const isNearBottom = this.isNearBottom(chatContainer);
 
-    // Render messages up to current step
-    for (let i = 0; i <= this.currentStep; i++) {
+    if (forceRebuild || this.currentStep < this.renderedUntilStep) {
+      // Full rebuild needed for backward navigation or jumps
+      chatContainer.querySelectorAll('.chat-message').forEach(el => el.remove());
+      this.renderedUntilStep = -1;
+    }
+
+    // Render only new messages from renderedUntilStep+1 to currentStep
+    for (let i = this.renderedUntilStep + 1; i <= this.currentStep; i++) {
       const step = this.currentScenario.timeline[i];
       if (!step || !step.chat) continue;
+
+      // Check if message already exists
+      if (chatContainer.querySelector(`[data-step="${i + 1}"]`)) continue;
 
       const messageEl = this.createChatMessage(step.chat, i + 1);
       chatContainer.appendChild(messageEl);
     }
 
-    // Scroll to bottom
-    setTimeout(() => {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }, 100);
+    this.renderedUntilStep = Math.max(this.renderedUntilStep, this.currentStep);
+
+    // Smart scroll: only scroll if user was near bottom
+    if (isNearBottom) {
+      this.scrollToBottom(chatContainer);
+    }
   }
 
   createChatMessage(chat, stepNumber) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-message ${chat.actor.toLowerCase()}`;
+    messageDiv.setAttribute('data-step', stepNumber);
+    messageDiv.setAttribute('aria-live', 'polite');
 
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'chat-avatar';
@@ -695,6 +731,33 @@ class InteractiveDemo {
     console.error(message);
     // You could implement a more sophisticated error display here
     alert(message);
+  }
+
+  // Chat scrolling helper methods
+  isNearBottom(container, threshold = 48) {
+    return (container.scrollHeight - (container.scrollTop + container.clientHeight)) < threshold;
+  }
+
+  scrollToBottom(container) {
+    if (this.scrollRequest) {
+      cancelAnimationFrame(this.scrollRequest);
+    }
+    
+    this.scrollRequest = requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+      this.scrollRequest = null;
+    });
+  }
+
+  debouncedNavigation(callback, delay = 150) {
+    if (this.navigationDebounceTimer) {
+      clearTimeout(this.navigationDebounceTimer);
+    }
+    
+    this.navigationDebounceTimer = setTimeout(() => {
+      callback();
+      this.navigationDebounceTimer = null;
+    }, delay);
   }
 }
 
