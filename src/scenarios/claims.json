@@ -1,0 +1,303 @@
+{
+  "meta": {
+    "title": "Claims Status Inquiry",
+    "description": "User asks an assistant for claim status. IdP authenticates user, PDP decides, STS mints OBO to MCP, agent invokes via handle, MCP injects token to Claims API.",
+    "overview": "A user wants to check the status of their insurance claim. To protect sensitive data, the system must authenticate the user, capture consent, mint a scoped on-behalf-of token, delegate to an AI agent via MCP (Model Context Protocol), and securely access the Claims API while logging all activity for audit compliance.",
+    "vertical": "Insurance"
+  },
+  "actors": [
+    {
+      "id": "User",
+      "name": "User",
+      "color": "#007bff"
+    },
+    {
+      "id": "Assistant",
+      "name": "AI Assistant (UX)",
+      "color": "#6c757d"
+    },
+    {
+      "id": "Agent",
+      "name": "AI Agent (Executor)",
+      "color": "#28a745"
+    },
+    {
+      "id": "MCP",
+      "name": "Model Context Protocol (Broker/PEP)",
+      "color": "#17a2b8"
+    },
+    {
+      "id": "IdP",
+      "name": "Identity Provider (PingOne Auth)",
+      "color": "#6f42c1"
+    },
+    {
+      "id": "PDP",
+      "name": "Policy Decision Point (PingOne Authorize)",
+      "color": "#fd7e14"
+    },
+    {
+      "id": "STS",
+      "name": "Security Token Service",
+      "color": "#e83e8c"
+    },
+    {
+      "id": "API",
+      "name": "Claims API",
+      "color": "#20c997"
+    },
+    {
+      "id": "Audit",
+      "name": "Audit System",
+      "color": "#ffc107"
+    }
+  ],
+  "phases": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "description": "Scenario introduction and problem statement"
+    },
+    {
+      "id": "auth",
+      "name": "Authentication",
+      "description": "User proves identity at IdP (LoA)"
+    },
+    {
+      "id": "consent",
+      "name": "Consent & Policy",
+      "description": "User approval; PDP evaluates"
+    },
+    {
+      "id": "token",
+      "name": "Token (OBO → MCP)",
+      "description": "STS mints on-behalf-of token to MCP; handle to agent"
+    },
+    {
+      "id": "api",
+      "name": "API Access (via MCP)",
+      "description": "Agent invokes via handle; MCP injects token"
+    },
+    {
+      "id": "result",
+      "name": "Result",
+      "description": "Assistant presents status to user"
+    }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Welcome! Let me walk you through a claims status inquiry scenario. A user wants to check the status of their insurance claim. To protect sensitive data, the system must authenticate the user, capture consent, mint a scoped on-behalf-of token, delegate to an AI agent via MCP (Model Context Protocol), and securely access the Claims API while logging all activity for audit compliance."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Presents scenario overview and explains the secure claims access flow"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Hi, what's the status of my claim?"
+      },
+      "swimlane": {
+        "activeActors": [
+          "User",
+          "Assistant"
+        ],
+        "actions": {
+          "User": "Initiates claim status inquiry",
+          "Assistant": "Parses intent: read claims status"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "I can check that. Please sign in to continue."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Redirects user to IdP for authentication",
+          "IdP": "Starts auth flow (username + MFA capable)",
+          "Audit": "Logs authentication initiated"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "auth",
+      "chat": {
+        "actor": "system",
+        "message": "You're signed in."
+      },
+      "swimlane": {
+        "activeActors": [
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "IdP": "Completes auth; establishes session (e.g., LoA1)",
+          "Audit": "Logs authentication success (LoA, auth_time)"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Do you want me to check your claims on your behalf?"
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant"
+        ],
+        "actions": {
+          "Assistant": "Requests explicit consent for read:claims"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes."
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "PDP",
+          "Audit"
+        ],
+        "actions": {
+          "MCP": "Asks PDP: Is LoA sufficient and is read:claims permitted?",
+          "PDP": "Evaluates policy → PERMIT (no step-up required for read)",
+          "Audit": "Logs consent captured and policy decision"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission for this request…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "STS",
+          "Audit"
+        ],
+        "actions": {
+          "MCP": "Brokers OBO request to STS (aud=Claims API, scope=read:claims)",
+          "STS": "Mints short-lived OBO token **to MCP** (PoP/mTLS bound)",
+          "Audit": "Logs OBO issuance (actor=Agent, subject=User, scope, aud)"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Ready. Proceeding to retrieve claim status."
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "Agent"
+        ],
+        "actions": {
+          "MCP": "Returns **operation handle** (opaque) to Agent (no token exposed)",
+          "Agent": "Prepares invocation using handle + parameters (e.g., claimId)"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "api",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Accessing your claim securely…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "Agent",
+          "MCP",
+          "API",
+          "Audit"
+        ],
+        "actions": {
+          "Agent": "Calls MCP with handle (on-behalf-of User)",
+          "MCP": "Validates handle/agent/tool; **injects OBO token**; forwards to API",
+          "API": "GET /claims/{id} with enforced scope=read:claims",
+          "Audit": "Logs API call and decision (correlation ID)"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "api",
+      "chat": {
+        "actor": "system",
+        "message": "Claim data retrieved."
+      },
+      "swimlane": {
+        "activeActors": [
+          "API",
+          "MCP",
+          "Agent"
+        ],
+        "actions": {
+          "API": "Returns claim status payload to MCP",
+          "MCP": "Passes response to Agent (no token exposure)",
+          "Agent": "Normalizes result for Assistant"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Your claim CLM-1234 is currently **In Review**. We’ll notify you when there’s an update."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Presents human-readable status",
+          "Audit": "Correlates end-to-end trace (auth → consent → OBO→ MCP→ API → response)"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "Delegation": "Agent acts on behalf of a user with explicit consent and scoped, short-lived tokens. Not impersonation.",
+    "OBO": "On-Behalf-Of token. A short-lived, narrowly scoped access token **issued to MCP** (not to the agent) to act for a specific user and action.",
+    "Operation Handle": "An opaque reference MCP gives the agent; MCP maps it to a stored OBO and context, and injects the token on outbound API calls.",
+    "LoA": "Level of Assurance established at the IdP. Policies (PDP) may require step-up MFA for sensitive actions.",
+    "MCP": "Broker/enforcer that mediates all agent access to APIs, validates policy, holds OBO tokens, and injects them on calls.",
+    "PDP": "Policy Decision Point that evaluates context (user, agent, risk, consent, LoA) and returns Permit/Deny/Conditions.",
+    "STS": "Security Token Service that mints short-lived, audience-pinned tokens after PDP conditions are satisfied.",
+    "Audit": "Correlated logging of user, agent, consent, policy decision, token issuance, and API result with a single trace ID."
+  }
+}
