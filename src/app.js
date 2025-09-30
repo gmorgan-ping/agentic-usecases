@@ -92,11 +92,11 @@ class InteractiveDemo {
     try {
       // Load the claims scenario
       const response = await fetch('../src/scenarios/claims.json');
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const claimsScenario = await response.json();
       this.scenarios.set('claims', claimsScenario);
 
@@ -113,7 +113,7 @@ class InteractiveDemo {
 
   populateScenarioDropdown(claimsScenario) {
     const selector = document.getElementById('scenarioSelector');
-    
+
     if (!selector) {
       console.error('Scenario selector not found');
       return;
@@ -186,14 +186,14 @@ class InteractiveDemo {
 
   switchToExecutive() {
     if (this.currentMode === 'executive') return;
-    
+
     // Complete any in-flight animations
     if (this.animationInProgress) {
       this.skipAnimation();
     }
-    
+
     this.currentMode = 'executive';
-    
+
     // Update button states
     document.getElementById('executiveBtn').classList.add('active');
     document.getElementById('executiveBtn').classList.remove('btn-outline-light');
@@ -201,13 +201,13 @@ class InteractiveDemo {
     document.getElementById('sequenceBtn').classList.remove('active');
     document.getElementById('sequenceBtn').classList.remove('btn-light');
     document.getElementById('sequenceBtn').classList.add('btn-outline-light');
-    
+
     // Cross-fade transition
     this.transitionToMode(() => {
       document.getElementById('executiveMode').style.display = 'contents';
       document.getElementById('sequenceMode').style.display = 'none';
       document.getElementById('navigationControls').style.display = 'block';
-      
+
       this.renderProgressiveBreadcrumb();
       this.renderChat(); // Preserve chat history
       this.renderCurrentActivity();
@@ -217,14 +217,14 @@ class InteractiveDemo {
 
   switchToSequence() {
     if (this.currentMode === 'sequence') return;
-    
+
     // Complete any in-flight animations
     if (this.animationInProgress) {
       this.skipAnimation();
     }
-    
+
     this.currentMode = 'sequence';
-    
+
     // Update button states
     document.getElementById('sequenceBtn').classList.add('active');
     document.getElementById('sequenceBtn').classList.remove('btn-outline-light');
@@ -232,13 +232,13 @@ class InteractiveDemo {
     document.getElementById('executiveBtn').classList.remove('active');
     document.getElementById('executiveBtn').classList.remove('btn-light');
     document.getElementById('executiveBtn').classList.add('btn-outline-light');
-    
+
     // Cross-fade transition
     this.transitionToMode(() => {
       document.getElementById('executiveMode').style.display = 'none';
       document.getElementById('sequenceMode').style.display = 'block';
       document.getElementById('navigationControls').style.display = 'none';
-      
+
       this.renderFullBreadcrumb();
       this.renderEnhancedSequenceView();
     });
@@ -254,7 +254,7 @@ class InteractiveDemo {
       if (this.animationInProgress) {
         this.skipAnimation();
       }
-      
+
       this.currentStep++;
       this.renderProgressiveBreadcrumb();
       this.renderChat(); // Incremental render
@@ -273,7 +273,7 @@ class InteractiveDemo {
       if (this.animationInProgress) {
         this.skipAnimation();
       }
-      
+
       this.currentStep--;
       this.renderProgressiveBreadcrumb();
       this.renderChat(true); // Force rebuild for backward navigation
@@ -348,7 +348,7 @@ class InteractiveDemo {
       if (this.animationInProgress) {
         this.skipAnimation();
       }
-      
+
       this.currentStep = targetStep;
       this.renderProgressiveBreadcrumb();
       this.renderChat(true); // Force rebuild for jumps
@@ -419,7 +419,7 @@ class InteractiveDemo {
     // In executive mode, show only reached phases; in sequence mode, show all
     const showAllPhases = this.currentMode === 'sequence';
     const reachedPhases = new Set();
-    
+
     if (!showAllPhases) {
       for (let i = 0; i <= this.currentStep; i++) {
         const step = this.currentScenario.timeline[i];
@@ -793,7 +793,7 @@ class InteractiveDemo {
     if (this.scrollRequest) {
       cancelAnimationFrame(this.scrollRequest);
     }
-    
+
     this.scrollRequest = requestAnimationFrame(() => {
       container.scrollTop = container.scrollHeight;
       this.scrollRequest = null;
@@ -804,7 +804,7 @@ class InteractiveDemo {
     if (this.navigationDebounceTimer) {
       clearTimeout(this.navigationDebounceTimer);
     }
-    
+
     this.navigationDebounceTimer = setTimeout(() => {
       callback();
       this.navigationDebounceTimer = null;
@@ -814,12 +814,12 @@ class InteractiveDemo {
   transitionToMode(callback) {
     const mainContent = document.getElementById('mainContent');
     mainContent.classList.add('mode-transition');
-    
+
     setTimeout(() => {
       callback();
       mainContent.classList.add('show');
     }, 150);
-    
+
     setTimeout(() => {
       mainContent.classList.remove('mode-transition', 'show');
     }, 300);
@@ -838,13 +838,13 @@ class InteractiveDemo {
     // Create sticky header row with actors as columns
     const headerRow = document.createElement('tr');
     headerRow.className = 'actor-header-row';
-    
+
     // First column: Step/Phase header
     const stepHeader = document.createElement('th');
     stepHeader.className = 'step-phase-header';
     stepHeader.innerHTML = 'Steps';
     headerRow.appendChild(stepHeader);
-    
+
     // Actor columns in exact order specified
     const actorOrder = ['User', 'Assistant', 'Agent', 'MCP', 'IdP', 'PDP', 'STS', 'API', 'Audit'];
     actorOrder.forEach(actorId => {
@@ -870,13 +870,13 @@ class InteractiveDemo {
     this.currentScenario.timeline.forEach((step, stepIndex) => {
       const row = document.createElement('tr');
       row.className = 'step-row';
-      
+
       // Highlight current step row
       if (stepIndex === this.currentStep) {
         row.classList.add('current-step');
         row.setAttribute('aria-current', 'row');
       }
-      
+
       // Step/Phase cell (sticky left)
       const stepCell = document.createElement('td');
       stepCell.className = 'step-phase-cell';
@@ -892,7 +892,7 @@ class InteractiveDemo {
         this.jumpToStepFromSequence(stepIndex);
       });
       row.appendChild(stepCell);
-      
+
       // Actor cells for this step
       actorOrder.forEach(actorId => {
         const actor = this.currentScenario.actors.find(a => a.id === actorId);
@@ -903,67 +903,63 @@ class InteractiveDemo {
           cell.addEventListener('click', () => {
             this.jumpToStepFromSequence(stepIndex);
           });
-          
+
           // Check if actor is active in this step
           if (step.swimlane && step.swimlane.activeActors.includes(actor.id)) {
             cell.classList.add('active');
             const action = step.swimlane.actions[actor.id];
-            
+
             // Create cell card with content
             const cellCard = document.createElement('div');
             cellCard.className = 'cell-card';
             cellCard.style.borderLeft = `3px solid ${actor.color}`;
-            
-            // Always show action text if available
+
+            // Simplified text creation - always create text element
+            const actionText = document.createElement('div');
+            actionText.className = 'action-text';
+
             if (action && action.trim()) {
-              const actionText = document.createElement('div');
-              actionText.className = 'action-text';
-              
-              // Truncate to ~30 characters with ellipsis
-              const truncatedText = action.length > 30 ? action.substring(0, 27) + '...' : action;
-              actionText.textContent = truncatedText;
-              
-              // Add Bootstrap tooltip for full text
-              actionText.setAttribute('data-bs-toggle', 'tooltip');
-              actionText.setAttribute('data-bs-placement', 'top');
-              actionText.setAttribute('title', action);
-              actionText.style.cursor = 'help';
-              
-              cellCard.appendChild(actionText);
+              // Use full text for multi-line display
+              actionText.textContent = action;
+              actionText.title = action; // Keep tooltip for consistency
+              console.log(`Adding full text for ${actor.id}:`, action); // Debug
             } else {
-              // Fallback if no action text
-              const placeholderText = document.createElement('div');
-              placeholderText.className = 'action-text';
-              placeholderText.textContent = 'Active';
-              placeholderText.style.fontStyle = 'italic';
-              placeholderText.style.color = '#6c757d';
-              cellCard.appendChild(placeholderText);
+              actionText.textContent = 'Active';
+              actionText.style.fontStyle = 'italic';
+              console.log(`Adding fallback text for ${actor.id}`); // Debug
             }
-            
+
+            // Let CSS handle the styling
+
+            cellCard.appendChild(actionText);
+
             // Add badges for special attributes
             this.addSequenceBadges(cellCard, step, actor.id);
-            
+
             cell.appendChild(cellCard);
           }
+
+          // Always append the cell to the row, whether active or not
+          row.appendChild(cell);
         }
       });
-      
+
       // Add arrows for hand-offs if multiple actors are active
       if (step.swimlane && step.swimlane.activeActors.length > 1) {
         this.addHandoffArrows(row, step.swimlane.activeActors, actorOrder);
       }
-      
+
       table.appendChild(row);
     });
 
     sequenceContainer.appendChild(table);
-    
+
     // Add legend
     this.addSequenceLegend(sequenceContainer);
-    
+
     // Initialize Bootstrap tooltips
     this.initializeTooltips();
-    
+
     // Auto-scroll to current step row
     this.scrollToCurrentStepRow();
   }
@@ -984,11 +980,11 @@ class InteractiveDemo {
       const badge = document.createElement('span');
       badge.className = 'action-badge';
       badge.textContent = step.policy.decision;
-      badge.style.backgroundColor = step.policy.decision === 'Permit' ? '#28a745' : 
-                                   step.policy.decision === 'Step-up' ? '#ffc107' : '#dc3545';
+      badge.style.backgroundColor = step.policy.decision === 'Permit' ? '#28a745' :
+        step.policy.decision === 'Step-up' ? '#ffc107' : '#dc3545';
       cell.appendChild(badge);
     }
-    
+
     // Add token badges
     if (step.token && step.token.type) {
       const badge = document.createElement('span');
@@ -997,7 +993,7 @@ class InteractiveDemo {
       badge.style.backgroundColor = '#17a2b8';
       cell.appendChild(badge);
     }
-    
+
     // Add handle badges
     if (step.handle && step.handle.id) {
       const badge = document.createElement('span');
@@ -1033,16 +1029,16 @@ class InteractiveDemo {
 
   scrollToPhaseInSequence(phaseId) {
     if (this.currentMode !== 'sequence') return;
-    
+
     // Find first step of the target phase
     const targetStepIndex = this.currentScenario.timeline.findIndex(step => step.phase === phaseId);
     if (targetStepIndex !== -1) {
       const targetRow = document.querySelectorAll('.step-row')[targetStepIndex];
       if (targetRow) {
-        targetRow.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center', 
-          inline: 'nearest' 
+        targetRow.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
         });
       }
     }
@@ -1051,14 +1047,14 @@ class InteractiveDemo {
   addHandoffArrows(row, activeActors, actorOrder) {
     // Create connecting arrows between active actor cells
     row.style.position = 'relative';
-    
+
     for (let i = 0; i < activeActors.length - 1; i++) {
       const fromActorId = activeActors[i];
       const toActorId = activeActors[i + 1];
-      
+
       const fromIndex = actorOrder.indexOf(fromActorId);
       const toIndex = actorOrder.indexOf(toActorId);
-      
+
       if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
         // Create arrow overlay div
         const arrowDiv = document.createElement('div');
@@ -1072,16 +1068,16 @@ class InteractiveDemo {
         arrowDiv.style.pointerEvents = 'none';
         arrowDiv.style.top = '50%';
         arrowDiv.style.transform = 'translateY(-50%)';
-        
+
         // Calculate position based on cell indices (accounting for step column)
         const cellWidth = 100 / (actorOrder.length + 1); // +1 for step column
         const fromLeft = (fromIndex + 1) * cellWidth + cellWidth / 2;
         const toLeft = (toIndex + 1) * cellWidth;
-        
+
         arrowDiv.style.left = `${fromLeft + 2}%`;
         arrowDiv.style.width = `${Math.abs(toLeft - fromLeft) - 4}%`;
         arrowDiv.style.textAlign = 'center';
-        
+
         row.appendChild(arrowDiv);
       }
     }
@@ -1089,13 +1085,13 @@ class InteractiveDemo {
 
   scrollToCurrentStepRow() {
     if (this.currentMode !== 'sequence') return;
-    
+
     const currentRow = document.querySelector('.step-row.current-step');
     if (currentRow) {
-      currentRow.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center', 
-        inline: 'nearest' 
+      currentRow.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest'
       });
     }
   }

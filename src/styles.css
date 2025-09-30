@@ -737,12 +737,14 @@ body {
 
 /* Actor Step Cells */
 .actor-step-cell {
-  min-width: 100px;
-  max-width: 120px;
+  min-width: 120px;
+  max-width: 160px;
   padding: 0.25rem;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  vertical-align: top;
+  word-break: break-word;
 }
 
 .actor-step-cell:hover {
@@ -762,10 +764,12 @@ body {
   padding: 0.5rem;
   margin: 0.1rem;
   transition: all 0.2s ease;
-  min-height: 40px;
+  min-height: 50px;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .cell-card:hover {
@@ -778,11 +782,13 @@ body {
   font-size: 0.75rem;
   color: #212529;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 0.25rem;
   line-height: 1.3;
+  word-wrap: break-word;
+  display: block;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .current-step .cell-card .action-text {
@@ -818,12 +824,29 @@ body {
 }
 
 /* Phase Colors */
-.phase-auth { background-color: #6f42c1; }
-.phase-consent { background-color: #fd7e14; }
-.phase-token { background-color: #e83e8c; }
-.phase-api { background-color: #20c997; }
-.phase-result { background-color: #17a2b8; }
-.phase-overview { background-color: #6c757d; }
+.phase-auth {
+  background-color: #6f42c1;
+}
+
+.phase-consent {
+  background-color: #fd7e14;
+}
+
+.phase-token {
+  background-color: #e83e8c;
+}
+
+.phase-api {
+  background-color: #20c997;
+}
+
+.phase-result {
+  background-color: #17a2b8;
+}
+
+.phase-overview {
+  background-color: #6c757d;
+}
 
 /* Sequence Legend */
 .sequence-legend {
@@ -877,5 +900,5 @@ body {
   font-size: 0.75rem;
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  display:none;
+  display: none;
 }
