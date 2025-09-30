@@ -17,7 +17,7 @@
 <body>
   <div class="container-fluid h-100">
     <!-- Sticky Header -->
-    <div class="sticky-top">
+    <div class="sticky-top" style="z-index: 1040;">
       <div class="row bg-dark text-white py-3">
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center">
@@ -38,6 +38,10 @@
                 </button>
               </div>
 
+              <!-- Glossary Button -->
+              <button id="glossaryBtn" class="btn btn-outline-light btn-sm" type="button" title="View Glossary">
+                <i class="bi bi-book"></i> Glossary
+              </button>
 
             </div>
           </div>
@@ -112,30 +116,32 @@
       <!-- Sequence Mode: Full Width Swimlane -->
       <div id="sequenceMode" class="col-12" style="display: none;">
         <div class="h-100 d-flex flex-column">
-          <div class="bg-info text-white px-3 py-2">
-            <h5 class="mb-0">
-              <i class="bi bi-diagram-3"></i> Complete Sequence View
-            </h5>
-          </div>
-          <div id="sequenceContainer" class="flex-grow-1 p-3 overflow-auto">
-            <!-- Full sequence diagram will be populated here -->
+          <div id="sequenceContainer" class="flex-grow-1 overflow-auto">
+            <div class="sequence-sticky-header bg-info text-white px-3 py-2">
+              <h5 class="mb-0">
+                <i class="bi bi-diagram-3"></i> Complete Sequence View
+              </h5>
+            </div>
+            <div id="sequenceContent" class="p-3">
+              <!-- Full sequence diagram will be populated here -->
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Optional Glossary Panel (initially hidden) -->
+    <!-- Glossary Panel (initially hidden) -->
     <div id="glossaryPanel" class="position-fixed bottom-0 end-0 bg-white border shadow-lg rounded-top"
-      style="width: 300px; max-height: 400px; display: none;">
+      style="width: 350px; max-height: 450px; display: none; z-index: 1050;">
       <div class="bg-info text-white px-3 py-2 d-flex justify-content-between align-items-center">
         <h6 class="mb-0">
-          <i class="bi bi-book"></i> Glossary
+          <i class="bi bi-book"></i> <span id="glossaryTitle">Glossary</span>
         </h6>
         <button id="closeGlossary" class="btn btn-sm btn-outline-light">
           <i class="bi bi-x"></i>
         </button>
       </div>
-      <div id="glossaryContent" class="p-3 overflow-auto" style="max-height: 350px;">
+      <div id="glossaryContent" class="p-3 overflow-auto" style="max-height: 400px;">
         <!-- Glossary content will be populated here -->
       </div>
     </div>

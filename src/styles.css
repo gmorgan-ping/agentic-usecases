@@ -244,12 +244,20 @@ body {
 .glossary-term {
   color: #007bff;
   text-decoration: underline;
+  text-decoration-style: dotted;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.05));
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 500;
 }
 
 .glossary-term:hover {
   color: #0056b3;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.2), rgba(0, 123, 255, 0.1));
+  text-decoration-style: solid;
+  transform: translateY(-1px);
 }
 
 .glossary-definition {
@@ -574,6 +582,18 @@ body {
   overflow: auto;
   scroll-behavior: smooth;
   position: relative;
+  height: 100%;
+}
+
+/* Sticky Sequence Header */
+.sequence-sticky-header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #17a2b8 !important;
 }
 
 /* Smooth Transitions */

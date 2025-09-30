@@ -66,6 +66,10 @@ class InteractiveDemo {
       this.hideGlossary();
     });
 
+    bindEvent('glossaryBtn', 'click', () => {
+      this.showFullGlossary();
+    });
+
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (!this.currentScenario) return;
@@ -580,9 +584,10 @@ class InteractiveDemo {
     const bubbleDiv = document.createElement('div');
     bubbleDiv.className = 'chat-bubble';
 
-    // Process message content for glossary terms
-    const processedMessage = this.processGlossaryTerms(chat.message);
-    bubbleDiv.innerHTML = this.formatMessage(processedMessage);
+    // Process message content - format first, then add glossary terms
+    const formattedMessage = this.formatMessage(chat.message);
+    const processedMessage = this.processGlossaryTerms(formattedMessage);
+    bubbleDiv.innerHTML = processedMessage;
 
     const timestampDiv = document.createElement('div');
     timestampDiv.className = 'chat-timestamp';
@@ -698,8 +703,8 @@ class InteractiveDemo {
   renderSequenceView() {
     if (!this.currentScenario) return;
 
-    const sequenceContainer = document.getElementById('sequenceContainer');
-    sequenceContainer.innerHTML = '';
+    const sequenceContent = document.getElementById('sequenceContent');
+    sequenceContent.innerHTML = '';
 
     // Create sequence table
     const table = document.createElement('table');
@@ -751,7 +756,7 @@ class InteractiveDemo {
     });
 
     table.appendChild(tbody);
-    sequenceContainer.appendChild(table);
+    sequenceContent.appendChild(table);
   }
 
   updateSwimlaneStates() {
@@ -827,9 +832,11 @@ class InteractiveDemo {
 
     let processedMessage = message;
     Object.keys(this.currentScenario.glossary).forEach(term => {
-      const regex = new RegExp(`\\b${term}\\b`, 'gi');
+      // Create a more robust regex that handles HTML tags
+      // This regex looks for the term as a whole word, but not inside HTML tags or existing spans
+      const regex = new RegExp(`(?<!<[^>]*)(\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b)(?![^<]*>)(?![^<]*</span>)`, 'gi');
       processedMessage = processedMessage.replace(regex, (match) => {
-        return `<span class="glossary-term" data-term="${term}">${match}</span>`;
+        return `<span class="glossary-term" data-term="${term}" title="Click to see definition">${match}</span>`;
       });
     });
 
@@ -841,13 +848,57 @@ class InteractiveDemo {
 
     const panel = document.getElementById('glossaryPanel');
     const content = document.getElementById('glossaryContent');
+    const title = document.getElementById('glossaryTitle');
 
+    title.textContent = term;
     content.innerHTML = `
             <div class="glossary-definition">
                 <strong>${term}</strong>
                 <p>${this.currentScenario.glossary[term]}</p>
+                <hr class="my-3">
+                <small class="text-muted">
+                  <i class="bi bi-lightbulb"></i> 
+                  Click "Glossary" in the header to see all terms
+                </small>
             </div>
         `;
+
+    panel.style.display = 'block';
+  }
+
+  showFullGlossary() {
+    if (!this.currentScenario || !this.currentScenario.glossary) {
+      this.showError('No glossary available for this scenario');
+      return;
+    }
+
+    const panel = document.getElementById('glossaryPanel');
+    const content = document.getElementById('glossaryContent');
+    const title = document.getElementById('glossaryTitle');
+    const glossary = this.currentScenario.glossary;
+
+    title.textContent = 'All Terms';
+
+    const glossaryHTML = Object.keys(glossary)
+      .sort()
+      .map(term => `
+        <div class="glossary-definition mb-3">
+          <strong class="text-primary">${term}</strong>
+          <p class="mb-2">${glossary[term]}</p>
+        </div>
+      `)
+      .join('<hr class="my-2">');
+
+    content.innerHTML = `
+      <div class="mb-3">
+        <small class="text-muted">
+          <i class="bi bi-info-circle"></i> 
+          ${Object.keys(glossary).length} terms available. 
+          Click highlighted terms in messages for quick reference.
+        </small>
+      </div>
+      ${glossaryHTML}
+    `;
 
     panel.style.display = 'block';
   }
@@ -906,8 +957,8 @@ class InteractiveDemo {
   renderEnhancedSequenceView() {
     if (!this.currentScenario) return;
 
-    const sequenceContainer = document.getElementById('sequenceContainer');
-    sequenceContainer.innerHTML = '';
+    const sequenceContent = document.getElementById('sequenceContent');
+    sequenceContent.innerHTML = '';
 
     // Create sequence table with new layout: actors as columns, steps as rows
     const table = document.createElement('table');
@@ -1027,7 +1078,7 @@ class InteractiveDemo {
       table.appendChild(row);
     });
 
-    sequenceContainer.appendChild(table);
+    sequenceContent.appendChild(table);
 
 
 
