@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 app.get('/api/scenarios', (req, res) => {
   const fs = require('fs');
   const scenariosPath = path.join(__dirname, 'src', 'scenarios');
-  
+
   try {
     // Read the index.json file
     const indexPath = path.join(scenariosPath, 'index.json');
@@ -36,7 +36,7 @@ app.get('/api/scenarios/:scenarioId', (req, res) => {
   const fs = require('fs');
   const scenarioId = req.params.scenarioId;
   const scenarioPath = path.join(__dirname, 'src', 'scenarios', `${scenarioId}.json`);
-  
+
   try {
     const scenarioData = JSON.parse(fs.readFileSync(scenarioPath, 'utf8'));
     res.json(scenarioData);

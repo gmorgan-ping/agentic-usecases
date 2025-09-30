@@ -1,4 +1,11 @@
 /* Custom Styles for Interactive Demo */
+:root {
+  --ping-red: #b72530;
+  --ping-blue: #051726;
+  --ping-gray: #6b757d;
+  --yellow-lite: #ffe08a;
+  --yellow-mid: #ffd54d;
+}
 
 /* Global Styles */
 html {
@@ -8,7 +15,25 @@ html {
 html,
 body {
   height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.site-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #212529;
+}
+
+/* Clean navbar styling with proper Bootstrap classes */
+
+.conversation-mode {
+  background-color: var(--ping-blue);
+  color: white;
+}
+
+.current-activity {
+  background-color: var(--ping-gray);
+  color: white;
 }
 
 .container-fluid {
@@ -54,7 +79,8 @@ body {
 }
 
 .chat-message.system .chat-bubble {
-  background: linear-gradient(135deg, #ffc107, #e0a800);
+  /* background: linear-gradient(135deg, #ffc107, #e0a800); */
+  background: linear-gradient(135deg, var(--yellow-lite), var(--yellow-mid));
   color: #212529;
   margin: 0 auto;
   text-align: center;
@@ -90,7 +116,7 @@ body {
 }
 
 .chat-message.system .chat-avatar {
-  background: #ffc107;
+  background: var(--yellow-lite);
   color: #212529;
   margin: 0 auto 0.5rem auto;
 }
@@ -276,97 +302,7 @@ body {
   color: #495057;
 }
 
-/* Animation Keyframes */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes glow {
-
-  0%,
-  100% {
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
-  }
-
-  50% {
-    box-shadow: 0 8px 24px rgba(0, 123, 255, 0.4);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.02);
-  }
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(-10px);
-  }
-
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Animation Classes */
 .fadeInUp {
@@ -663,11 +599,27 @@ body {
   }
 }
 
-/* Mode Toggle Buttons */
-.btn-group .btn.active {
-  background-color: #fff !important;
-  color: #000 !important;
-  border-color: #fff !important;
+/* Mode Toggle Buttons - Only target header mode toggle buttons */
+.btn-group[aria-label="View Mode Toggle"] .btn {
+  background-color: #f8f9fa !important;
+  color: #495057 !important;
+  border-color: var(--ping-blue) !important;
+}
+
+.btn-group[aria-label="View Mode Toggle"] .btn:hover {
+  background-color: #e9ecef !important;
+  color: #495057 !important;
+  border-color: var(--ping-blue) !important;
+}
+
+.btn-group[aria-label="View Mode Toggle"] .btn.active {
+  background-color: var(--ping-red) !important;
+  color: #fff !important;
+  border-color: var(--ping-red) !important;
+}
+
+.btn-primary {
+  background-color: var(--ping-blue) !important;
 }
 
 /* Mode Transition */
@@ -970,4 +922,96 @@ body {
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: none;
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 8px 24px rgba(0, 123, 255, 0.4);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-10px);
+  }
+
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

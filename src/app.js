@@ -703,7 +703,7 @@ class InteractiveDemo {
   renderSequenceView() {
     if (!this.currentScenario) return;
 
-    const sequenceContent = document.getElementById('sequenceContent');
+    const sequenceContent = document.getElementById('sequenceContainer');
     sequenceContent.innerHTML = '';
 
     // Create sequence table
@@ -957,7 +957,7 @@ class InteractiveDemo {
   renderEnhancedSequenceView() {
     if (!this.currentScenario) return;
 
-    const sequenceContent = document.getElementById('sequenceContent');
+    const sequenceContent = document.getElementById('sequenceContainer');
     sequenceContent.innerHTML = '';
 
     // Create sequence table with new layout: actors as columns, steps as rows

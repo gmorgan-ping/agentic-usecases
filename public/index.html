@@ -5,23 +5,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ping Identity - Agentic AI</title>
+  <link rel="icon" type="image/png" href="/images/favicon.png">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap" rel="stylesheet">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
   <div class="container-fluid h-100">
     <!-- Sticky Header -->
     <div class="sticky-top" style="z-index: 1040;">
-      <div class="row bg-dark text-white py-3">
+      <div class="row bg-white border-bottom py-3">
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0">Agentic AI - Interactive Demo</h1>
+            <a class="navbar-brand d-flex align-items-center" href="/">
+              <img src="/images/logo.png" alt="Logo" height="22" class="me-2">
+              | <span class="fw-normal site-title ps-2">Agentic AI - Interactive Demo</span>
+            </a>
             <div class="d-flex gap-3 align-items-center">
               <!-- Scenario Selector -->
               <select id="scenarioSelector" class="form-select form-select-sm" style="width: auto;">
@@ -30,16 +36,16 @@
 
               <!-- Mode Toggle Buttons -->
               <div class="btn-group" role="group" aria-label="View Mode Toggle">
-                <button id="executiveBtn" class="btn btn-light btn-sm active" type="button">
+                <button id="executiveBtn" class="btn btn-primary btn-sm active" type="button">
                   <i class="bi bi-chat-dots"></i> Chatbot
                 </button>
-                <button id="sequenceBtn" class="btn btn-outline-light btn-sm" type="button">
+                <button id="sequenceBtn" class="btn btn-primary btn-sm" type="button">
                   <i class="bi bi-diagram-3"></i> Sequence
                 </button>
               </div>
 
               <!-- Glossary Button -->
-              <button id="glossaryBtn" class="btn btn-outline-light btn-sm" type="button" title="View Glossary">
+              <button id="glossaryBtn" class="btn btn-secondary btn-sm" type="button" title="View Glossary">
                 <i class="bi bi-book"></i> Glossary
               </button>
 
@@ -67,7 +73,7 @@
         <!-- Left Pane - Chat -->
         <div class="col-6 border-end">
           <div class="h-100 d-flex flex-column">
-            <div class="bg-primary text-white px-3 py-2">
+            <div class="conversation-mode px-3 py-2">
               <h5 class="mb-0">
                 <i class="bi bi-chat-dots"></i> Conversation
               </h5>
@@ -97,7 +103,7 @@
         <!-- Right Pane - Current Activity -->
         <div class="col-6">
           <div class="h-100 d-flex flex-column">
-            <div class="bg-success text-white px-3 py-2">
+            <div class="current-activity px-3 py-2">
               <h5 class="mb-0">
                 <i class="bi bi-activity"></i> Current Activity
               </h5>
@@ -116,35 +122,29 @@
       <!-- Sequence Mode: Full Width Swimlane -->
       <div id="sequenceMode" class="col-12" style="display: none;">
         <div class="h-100 d-flex flex-column">
-          <div id="sequenceContainer" class="flex-grow-1 overflow-auto">
-            <div class="sequence-sticky-header bg-info text-white px-3 py-2">
-              <h5 class="mb-0">
-                <i class="bi bi-diagram-3"></i> Complete Sequence View
-              </h5>
-            </div>
-            <div id="sequenceContent" class="p-3">
-              <!-- Full sequence diagram will be populated here -->
-            </div>
+          <div id="sequenceContainer" class="flex-grow-1 overflow-auto p-3">
+            <!-- Full sequence diagram will be populated here -->
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Glossary Panel (initially hidden) -->
-    <div id="glossaryPanel" class="position-fixed bottom-0 end-0 bg-white border shadow-lg rounded-top"
-      style="width: 350px; max-height: 450px; display: none; z-index: 1050;">
-      <div class="bg-info text-white px-3 py-2 d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">
-          <i class="bi bi-book"></i> <span id="glossaryTitle">Glossary</span>
-        </h6>
-        <button id="closeGlossary" class="btn btn-sm btn-outline-light">
-          <i class="bi bi-x"></i>
-        </button>
-      </div>
-      <div id="glossaryContent" class="p-3 overflow-auto" style="max-height: 400px;">
-        <!-- Glossary content will be populated here -->
-      </div>
+  <!-- Glossary Panel (initially hidden) -->
+  <div id="glossaryPanel" class="position-fixed bottom-0 end-0 bg-white border shadow-lg rounded-top"
+    style="width: 350px; max-height: 450px; display: none; z-index: 1050;">
+    <div class="bg-info text-white px-3 py-2 d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">
+        <i class="bi bi-book"></i> <span id="glossaryTitle">Glossary</span>
+      </h6>
+      <button id="closeGlossary" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-x"></i>
+      </button>
     </div>
+    <div id="glossaryContent" class="p-3 overflow-auto" style="max-height: 400px;">
+      <!-- Glossary content will be populated here -->
+    </div>
+  </div>
   </div>
 
   <!-- Bootstrap JS -->
