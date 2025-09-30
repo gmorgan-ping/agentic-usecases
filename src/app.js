@@ -52,9 +52,14 @@ class InteractiveDemo {
       this.prevStep();
     });
 
-    // Mode buttons removed - now using integrated Step 0 approach
+    // Mode toggle buttons
+    bindEvent('executiveBtn', 'click', () => {
+      this.switchToExecutive();
+    });
 
-    // Note: startWalkthroughBtn removed - overview is now Step 0 in timeline
+    bindEvent('sequenceBtn', 'click', () => {
+      this.switchToSequence();
+    });
 
     // Glossary panel
     bindEvent('closeGlossary', 'click', () => {
@@ -155,10 +160,19 @@ class InteractiveDemo {
     this.currentMode = 'executive';
     this.renderedUntilStep = -1; // Reset for new scenario
 
+    // Update button states to show Executive as active
+    document.getElementById('executiveBtn').classList.add('active');
+    document.getElementById('executiveBtn').classList.remove('btn-outline-light');
+    document.getElementById('executiveBtn').classList.add('btn-light');
+    document.getElementById('sequenceBtn').classList.remove('active');
+    document.getElementById('sequenceBtn').classList.remove('btn-light');
+    document.getElementById('sequenceBtn').classList.add('btn-outline-light');
+
     // Show main content in executive mode
     document.getElementById('mainContent').style.display = 'flex';
     document.getElementById('executiveMode').style.display = 'contents';
     document.getElementById('sequenceMode').style.display = 'none';
+    document.getElementById('navigationControls').style.display = 'block';
 
     // Show navigation buttons
     document.getElementById('prevBtn').style.display = 'inline-block';
@@ -170,22 +184,64 @@ class InteractiveDemo {
     this.updateNavigationButtons();
   }
 
-  // switchToOverview method removed - overview is now integrated as Step 0
+  switchToExecutive() {
+    if (this.currentMode === 'executive') return;
+    
+    // Complete any in-flight animations
+    if (this.animationInProgress) {
+      this.skipAnimation();
+    }
+    
+    this.currentMode = 'executive';
+    
+    // Update button states
+    document.getElementById('executiveBtn').classList.add('active');
+    document.getElementById('executiveBtn').classList.remove('btn-outline-light');
+    document.getElementById('executiveBtn').classList.add('btn-light');
+    document.getElementById('sequenceBtn').classList.remove('active');
+    document.getElementById('sequenceBtn').classList.remove('btn-light');
+    document.getElementById('sequenceBtn').classList.add('btn-outline-light');
+    
+    // Cross-fade transition
+    this.transitionToMode(() => {
+      document.getElementById('executiveMode').style.display = 'contents';
+      document.getElementById('sequenceMode').style.display = 'none';
+      document.getElementById('navigationControls').style.display = 'block';
+      
+      this.renderProgressiveBreadcrumb();
+      this.renderChat(); // Preserve chat history
+      this.renderCurrentActivity();
+      this.updateNavigationButtons();
+    });
+  }
 
   switchToSequence() {
+    if (this.currentMode === 'sequence') return;
+    
+    // Complete any in-flight animations
+    if (this.animationInProgress) {
+      this.skipAnimation();
+    }
+    
     this.currentMode = 'sequence';
-
-    // Show sequence mode
-    document.getElementById('mainContent').style.display = 'flex';
-    document.getElementById('executiveMode').style.display = 'none';
-    document.getElementById('sequenceMode').style.display = 'block';
-
-    // Hide navigation buttons in sequence mode
-    document.getElementById('prevBtn').style.display = 'none';
-    document.getElementById('nextBtn').style.display = 'none';
-
-    this.renderFullBreadcrumb();
-    this.renderSequenceView();
+    
+    // Update button states
+    document.getElementById('sequenceBtn').classList.add('active');
+    document.getElementById('sequenceBtn').classList.remove('btn-outline-light');
+    document.getElementById('sequenceBtn').classList.add('btn-light');
+    document.getElementById('executiveBtn').classList.remove('active');
+    document.getElementById('executiveBtn').classList.remove('btn-light');
+    document.getElementById('executiveBtn').classList.add('btn-outline-light');
+    
+    // Cross-fade transition
+    this.transitionToMode(() => {
+      document.getElementById('executiveMode').style.display = 'none';
+      document.getElementById('sequenceMode').style.display = 'block';
+      document.getElementById('navigationControls').style.display = 'none';
+      
+      this.renderFullBreadcrumb();
+      this.renderEnhancedSequenceView();
+    });
   }
 
   nextStep() {
@@ -360,19 +416,23 @@ class InteractiveDemo {
     const breadcrumb = document.getElementById('breadcrumb');
     breadcrumb.innerHTML = '';
 
-    // Get all phases that have been reached so far
+    // In executive mode, show only reached phases; in sequence mode, show all
+    const showAllPhases = this.currentMode === 'sequence';
     const reachedPhases = new Set();
-    for (let i = 0; i <= this.currentStep; i++) {
-      const step = this.currentScenario.timeline[i];
-      if (step && step.phase) {
-        reachedPhases.add(step.phase);
+    
+    if (!showAllPhases) {
+      for (let i = 0; i <= this.currentStep; i++) {
+        const step = this.currentScenario.timeline[i];
+        if (step && step.phase) {
+          reachedPhases.add(step.phase);
+        }
       }
     }
 
     const currentPhase = this.currentScenario.timeline[this.currentStep]?.phase;
 
     this.currentScenario.phases.forEach((phase) => {
-      if (reachedPhases.has(phase.id)) {
+      if (showAllPhases || reachedPhases.has(phase.id)) {
         const li = document.createElement('li');
         li.className = 'breadcrumb-item';
 
@@ -383,7 +443,13 @@ class InteractiveDemo {
           const link = document.createElement('a');
           link.textContent = phase.name;
           link.title = phase.description;
-          link.addEventListener('click', () => this.jumpToPhase(phase.id));
+          link.addEventListener('click', () => {
+            if (this.currentMode === 'sequence') {
+              this.scrollToPhaseInSequence(phase.id);
+            } else {
+              this.jumpToPhase(phase.id);
+            }
+          });
           li.appendChild(link);
         }
 
@@ -393,23 +459,8 @@ class InteractiveDemo {
   }
 
   renderFullBreadcrumb() {
-    if (!this.currentScenario) return;
-
-    const breadcrumb = document.getElementById('breadcrumb');
-    breadcrumb.innerHTML = '';
-
-    this.currentScenario.phases.forEach((phase) => {
-      const li = document.createElement('li');
-      li.className = 'breadcrumb-item';
-
-      const link = document.createElement('a');
-      link.textContent = phase.name;
-      link.title = phase.description;
-      link.addEventListener('click', () => this.jumpToPhaseInSequence(phase.id));
-      li.appendChild(link);
-
-      breadcrumb.appendChild(li);
-    });
+    // Use the same logic as progressive breadcrumb
+    this.renderProgressiveBreadcrumb();
   }
 
   renderChat(forceRebuild = false) {
@@ -758,6 +809,295 @@ class InteractiveDemo {
       callback();
       this.navigationDebounceTimer = null;
     }, delay);
+  }
+
+  transitionToMode(callback) {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.classList.add('mode-transition');
+    
+    setTimeout(() => {
+      callback();
+      mainContent.classList.add('show');
+    }, 150);
+    
+    setTimeout(() => {
+      mainContent.classList.remove('mode-transition', 'show');
+    }, 300);
+  }
+
+  renderEnhancedSequenceView() {
+    if (!this.currentScenario) return;
+
+    const sequenceContainer = document.getElementById('sequenceContainer');
+    sequenceContainer.innerHTML = '';
+
+    // Create sequence table with new layout: actors as columns, steps as rows
+    const table = document.createElement('table');
+    table.className = 'sequence-diagram';
+
+    // Create sticky header row with actors as columns
+    const headerRow = document.createElement('tr');
+    headerRow.className = 'actor-header-row';
+    
+    // First column: Step/Phase header
+    const stepHeader = document.createElement('th');
+    stepHeader.className = 'step-phase-header';
+    stepHeader.innerHTML = 'Steps';
+    headerRow.appendChild(stepHeader);
+    
+    // Actor columns in exact order specified
+    const actorOrder = ['User', 'Assistant', 'Agent', 'MCP', 'IdP', 'PDP', 'STS', 'API', 'Audit'];
+    actorOrder.forEach(actorId => {
+      const actor = this.currentScenario.actors.find(a => a.id === actorId);
+      if (actor) {
+        const th = document.createElement('th');
+        th.className = 'actor-column-header';
+        th.style.borderTop = `3px solid ${actor.color}`;
+        th.innerHTML = `
+          <div class="actor-header-content">
+            <div class="actor-avatar" style="background-color: ${actor.color};">
+              ${this.getActorInitials(actor.name)}
+            </div>
+            <span class="actor-name">${actor.name}</span>
+          </div>
+        `;
+        headerRow.appendChild(th);
+      }
+    });
+    table.appendChild(headerRow);
+
+    // Create step rows
+    this.currentScenario.timeline.forEach((step, stepIndex) => {
+      const row = document.createElement('tr');
+      row.className = 'step-row';
+      
+      // Highlight current step row
+      if (stepIndex === this.currentStep) {
+        row.classList.add('current-step');
+        row.setAttribute('aria-current', 'row');
+      }
+      
+      // Step/Phase cell (sticky left)
+      const stepCell = document.createElement('td');
+      stepCell.className = 'step-phase-cell';
+      stepCell.innerHTML = `
+        <div class="step-info">
+          <strong>Step ${stepIndex + 1}</strong>
+          <div class="phase-name">${step.phase}</div>
+        </div>
+      `;
+      stepCell.style.cursor = 'pointer';
+      stepCell.title = `Click to jump to Step ${stepIndex + 1}`;
+      stepCell.addEventListener('click', () => {
+        this.jumpToStepFromSequence(stepIndex);
+      });
+      row.appendChild(stepCell);
+      
+      // Actor cells for this step
+      actorOrder.forEach(actorId => {
+        const actor = this.currentScenario.actors.find(a => a.id === actorId);
+        if (actor) {
+          const cell = document.createElement('td');
+          cell.className = 'actor-step-cell';
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', () => {
+            this.jumpToStepFromSequence(stepIndex);
+          });
+          
+          // Check if actor is active in this step
+          if (step.swimlane && step.swimlane.activeActors.includes(actor.id)) {
+            cell.classList.add('active');
+            const action = step.swimlane.actions[actor.id];
+            
+            // Create cell card with content
+            const cellCard = document.createElement('div');
+            cellCard.className = 'cell-card';
+            cellCard.style.borderLeft = `3px solid ${actor.color}`;
+            
+            // Always show action text if available
+            if (action && action.trim()) {
+              const actionText = document.createElement('div');
+              actionText.className = 'action-text';
+              
+              // Truncate to ~30 characters with ellipsis
+              const truncatedText = action.length > 30 ? action.substring(0, 27) + '...' : action;
+              actionText.textContent = truncatedText;
+              
+              // Add Bootstrap tooltip for full text
+              actionText.setAttribute('data-bs-toggle', 'tooltip');
+              actionText.setAttribute('data-bs-placement', 'top');
+              actionText.setAttribute('title', action);
+              actionText.style.cursor = 'help';
+              
+              cellCard.appendChild(actionText);
+            } else {
+              // Fallback if no action text
+              const placeholderText = document.createElement('div');
+              placeholderText.className = 'action-text';
+              placeholderText.textContent = 'Active';
+              placeholderText.style.fontStyle = 'italic';
+              placeholderText.style.color = '#6c757d';
+              cellCard.appendChild(placeholderText);
+            }
+            
+            // Add badges for special attributes
+            this.addSequenceBadges(cellCard, step, actor.id);
+            
+            cell.appendChild(cellCard);
+          }
+        }
+      });
+      
+      // Add arrows for hand-offs if multiple actors are active
+      if (step.swimlane && step.swimlane.activeActors.length > 1) {
+        this.addHandoffArrows(row, step.swimlane.activeActors, actorOrder);
+      }
+      
+      table.appendChild(row);
+    });
+
+    sequenceContainer.appendChild(table);
+    
+    // Add legend
+    this.addSequenceLegend(sequenceContainer);
+    
+    // Initialize Bootstrap tooltips
+    this.initializeTooltips();
+    
+    // Auto-scroll to current step row
+    this.scrollToCurrentStepRow();
+  }
+
+  initializeTooltips() {
+    // Initialize Bootstrap tooltips for action text
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(element => {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        new bootstrap.Tooltip(element);
+      }
+    });
+  }
+
+  addSequenceBadges(cell, step, actorId) {
+    // Add policy decision badges
+    if (step.policy && step.policy.decision) {
+      const badge = document.createElement('span');
+      badge.className = 'action-badge';
+      badge.textContent = step.policy.decision;
+      badge.style.backgroundColor = step.policy.decision === 'Permit' ? '#28a745' : 
+                                   step.policy.decision === 'Step-up' ? '#ffc107' : '#dc3545';
+      cell.appendChild(badge);
+    }
+    
+    // Add token badges
+    if (step.token && step.token.type) {
+      const badge = document.createElement('span');
+      badge.className = 'action-badge';
+      badge.textContent = `${step.token.type}${step.token.holder ? ' → ' + step.token.holder : ''}`;
+      badge.style.backgroundColor = '#17a2b8';
+      cell.appendChild(badge);
+    }
+    
+    // Add handle badges
+    if (step.handle && step.handle.id) {
+      const badge = document.createElement('span');
+      badge.className = 'action-badge';
+      badge.textContent = 'Handle';
+      badge.style.backgroundColor = '#6f42c1';
+      cell.appendChild(badge);
+    }
+  }
+
+  addSequenceLegend(container) {
+    const legend = document.createElement('div');
+    legend.className = 'sequence-legend';
+    legend.innerHTML = `
+      <div class="legend-title">Badges</div>
+      <div class="legend-item">
+        <span class="legend-badge" style="background-color: #28a745;">Permit</span>
+        <span class="legend-badge" style="background-color: #ffc107; color: #000;">Step-up</span>
+        <span class="legend-badge" style="background-color: #dc3545;">Deny</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-badge" style="background-color: #17a2b8;">OBO→MCP</span>
+        <span class="legend-badge" style="background-color: #6f42c1;">Handle</span>
+      </div>
+    `;
+    container.appendChild(legend);
+  }
+
+  jumpToStepFromSequence(stepIndex) {
+    this.currentStep = stepIndex;
+    this.switchToExecutive();
+  }
+
+  scrollToPhaseInSequence(phaseId) {
+    if (this.currentMode !== 'sequence') return;
+    
+    // Find first step of the target phase
+    const targetStepIndex = this.currentScenario.timeline.findIndex(step => step.phase === phaseId);
+    if (targetStepIndex !== -1) {
+      const targetRow = document.querySelectorAll('.step-row')[targetStepIndex];
+      if (targetRow) {
+        targetRow.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center', 
+          inline: 'nearest' 
+        });
+      }
+    }
+  }
+
+  addHandoffArrows(row, activeActors, actorOrder) {
+    // Create connecting arrows between active actor cells
+    row.style.position = 'relative';
+    
+    for (let i = 0; i < activeActors.length - 1; i++) {
+      const fromActorId = activeActors[i];
+      const toActorId = activeActors[i + 1];
+      
+      const fromIndex = actorOrder.indexOf(fromActorId);
+      const toIndex = actorOrder.indexOf(toActorId);
+      
+      if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+        // Create arrow overlay div
+        const arrowDiv = document.createElement('div');
+        arrowDiv.className = 'handoff-arrow-overlay';
+        arrowDiv.innerHTML = '→';
+        arrowDiv.style.position = 'absolute';
+        arrowDiv.style.color = '#007bff';
+        arrowDiv.style.fontWeight = 'bold';
+        arrowDiv.style.fontSize = '1.2rem';
+        arrowDiv.style.zIndex = '5';
+        arrowDiv.style.pointerEvents = 'none';
+        arrowDiv.style.top = '50%';
+        arrowDiv.style.transform = 'translateY(-50%)';
+        
+        // Calculate position based on cell indices (accounting for step column)
+        const cellWidth = 100 / (actorOrder.length + 1); // +1 for step column
+        const fromLeft = (fromIndex + 1) * cellWidth + cellWidth / 2;
+        const toLeft = (toIndex + 1) * cellWidth;
+        
+        arrowDiv.style.left = `${fromLeft + 2}%`;
+        arrowDiv.style.width = `${Math.abs(toLeft - fromLeft) - 4}%`;
+        arrowDiv.style.textAlign = 'center';
+        
+        row.appendChild(arrowDiv);
+      }
+    }
+  }
+
+  scrollToCurrentStepRow() {
+    if (this.currentMode !== 'sequence') return;
+    
+    const currentRow = document.querySelector('.step-row.current-step');
+    if (currentRow) {
+      currentRow.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center', 
+        inline: 'nearest' 
+      });
+    }
   }
 }
 

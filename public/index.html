@@ -26,8 +26,19 @@
             <select id="scenarioSelector" class="form-select form-select-sm" style="width: auto;">
               <option value="">Select Scenario...</option>
             </select>
+            
+            <!-- Mode Toggle Buttons -->
+            <div class="btn-group" role="group" aria-label="View Mode Toggle">
+              <button id="executiveBtn" class="btn btn-light btn-sm active" type="button">
+                <i class="bi bi-chat-dots"></i> Executive
+              </button>
+              <button id="sequenceBtn" class="btn btn-outline-light btn-sm" type="button">
+                <i class="bi bi-diagram-3"></i> Sequence
+              </button>
+            </div>
+            
             <!-- Navigation Controls -->
-            <div class="btn-group" role="group">
+            <div id="navigationControls" class="btn-group" role="group">
               <button id="prevBtn" class="btn btn-outline-light btn-sm" disabled>
                 <i class="bi bi-chevron-left"></i> Back
               </button>
