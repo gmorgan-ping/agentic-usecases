@@ -172,11 +172,10 @@ class InteractiveDemo {
     document.getElementById('mainContent').style.display = 'flex';
     document.getElementById('executiveMode').style.display = 'contents';
     document.getElementById('sequenceMode').style.display = 'none';
-    document.getElementById('navigationControls').style.display = 'block';
+    document.getElementById('floatingNavigation').style.display = 'block';
 
-    // Show navigation buttons
-    document.getElementById('prevBtn').style.display = 'inline-block';
-    document.getElementById('nextBtn').style.display = 'inline-block';
+    // Navigation buttons are now floating in chat container
+    // No need to set individual button display styles
 
     this.renderProgressiveBreadcrumb();
     this.renderChat(true); // Force rebuild for new scenario
@@ -206,7 +205,7 @@ class InteractiveDemo {
     this.transitionToMode(() => {
       document.getElementById('executiveMode').style.display = 'contents';
       document.getElementById('sequenceMode').style.display = 'none';
-      document.getElementById('navigationControls').style.display = 'block';
+      document.getElementById('floatingNavigation').style.display = 'block';
 
       this.renderProgressiveBreadcrumb();
       this.renderChat(); // Preserve chat history
@@ -237,7 +236,7 @@ class InteractiveDemo {
     this.transitionToMode(() => {
       document.getElementById('executiveMode').style.display = 'none';
       document.getElementById('sequenceMode').style.display = 'block';
-      document.getElementById('navigationControls').style.display = 'none';
+      document.getElementById('floatingNavigation').style.display = 'none';
 
       this.renderFullBreadcrumb();
       this.renderEnhancedSequenceView();

@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "title": "Bank Transfer ($500 Checking → Savings)",
+    "description": "User asks an assistant to move $500 from checking to savings. IdP authenticates the user, PDP requires step-up, STS mints OBO to MCP, agent invokes via handle, and MCP injects the token to the Bank API.",
+    "overview": "A user wants to transfer $500 from their checking account to their savings account. To protect funds, the system must authenticate the user, obtain explicit consent, require step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and execute the transfer through the Bank API while auditing the full chain of events.",
+    "vertical": "Banking"
+  },
+  "actors": [
+    { "id": "User", "name": "User", "color": "#007bff" },
+    { "id": "Assistant", "name": "AI Assistant (UX)", "color": "#6c757d" },
+    { "id": "Agent", "name": "AI Agent (Executor)", "color": "#28a745" },
+    { "id": "MCP", "name": "Model Context Protocol (Broker/PEP)", "color": "#17a2b8" },
+    { "id": "IdP", "name": "Identity Provider (PingOne Auth)", "color": "#6f42c1" },
+    { "id": "PDP", "name": "Policy Decision Point (PingOne Authorize)", "color": "#fd7e14" },
+    { "id": "STS", "name": "Security Token Service", "color": "#e83e8c" },
+    { "id": "API", "name": "Bank API", "color": "#20c997" },
+    { "id": "Audit", "name": "Audit System", "color": "#ffc107" }
+  ],
+  "phases": [
+    { "id": "overview", "name": "Overview", "description": "Scenario introduction and problem statement" },
+    { "id": "auth", "name": "Authentication", "description": "User proves identity at IdP (LoA)" },
+    { "id": "consent", "name": "Consent & Policy", "description": "User approval; PDP evaluates (may require step-up)" },
+    { "id": "token", "name": "Token (OBO → MCP)", "description": "STS mints on-behalf-of token to MCP; handle to agent" },
+    { "id": "api", "name": "API Access (via MCP)", "description": "Agent invokes via handle; MCP injects token" },
+    { "id": "result", "name": "Result", "description": "Assistant presents outcome to user" }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "This scenario demonstrates a $500 transfer from checking to savings. We’ll authenticate you, capture consent, require step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and execute the transfer through the Bank API with full audit."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Introduces secure money-movement flow and controls"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Move $500 from checking to savings."
+      },
+      "swimlane": {
+        "activeActors": ["User", "Assistant"],
+        "actions": {
+          "User": "Initiates transfer request ($500, chk→svg)",
+          "Assistant": "Parses intent: transfer funds"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "I can help with that. Please sign in to continue."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant", "IdP", "Audit"],
+        "actions": {
+          "Assistant": "Redirects user to IdP for authentication",
+          "IdP": "Starts auth flow (username/password; MFA capable)",
+          "Audit": "Logs authentication initiated"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "auth",
+      "chat": {
+        "actor": "system",
+        "message": "You're signed in."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Completes auth; establishes session (LoA1)",
+          "Audit": "Logs authentication success (LoA, auth_time)"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Please confirm: transfer **$500** from **Checking** to **Savings** now?"
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Requests explicit consent with parameters (amount, from, to)"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, please proceed."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "PDP", "Audit"],
+        "actions": {
+          "MCP": "Asks PDP: evaluate transfer request (risk, LoA, limits, consent)",
+          "PDP": "Decision: step-up required for money movement (LoA≥2)",
+          "Audit": "Logs consent captured and PDP step-up requirement"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "For security, please complete MFA to continue."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Executes step-up MFA; raises assurance to LoA2/3",
+          "Audit": "Logs step-up challenge and success"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "consent",
+      "chat": {
+        "actor": "system",
+        "message": "Security check complete. Proceeding…"
+      },
+      "swimlane": {
+        "activeActors": ["PDP"],
+        "actions": {
+          "PDP": "Re-evaluates with LoA met → PERMIT (with constraints)"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission for this transfer…"
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "STS", "Audit"],
+        "actions": {
+          "MCP": "Requests OBO from STS (aud=Bank API, scope=transfer:amount:500; resource=acct chk→svg; ttl≈60–120s)",
+          "STS": "Mints short-lived OBO token **to MCP** (PoP/mTLS bound)",
+          "Audit": "Logs OBO issuance (actor=Agent, subject=User, scope, aud, ttl)"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Authorization prepared."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "Agent"],
+        "actions": {
+          "MCP": "Returns **operation handle** (opaque) to Agent; binds to (user, agent, params, consent)",
+          "Agent": "Prepares invocation using handle + idempotency key"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "api",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Submitting your transfer securely…"
+      },
+      "swimlane": {
+        "activeActors": ["Agent", "MCP", "API", "Audit"],
+        "actions": {
+          "Agent": "Calls MCP with handle and parameters (amount=500, from=checking, to=savings)",
+          "MCP": "Validates handle/agent/tool; **injects OBO token**; forwards to API",
+          "API": "POST /transfers { from, to, amount } — enforces scope/resource/idempotency",
+          "Audit": "Logs API call and decision (correlation ID)"
+        }
+      }
+    },
+    {
+      "step": 11,
+      "phase": "result",
+      "chat": {
+        "actor": "system",
+        "message": "Transfer completed. Reference #TX-9876."
+      },
+      "swimlane": {
+        "activeActors": ["API", "MCP", "Agent", "Assistant", "Audit"],
+        "actions": {
+          "API": "Returns 200 + transfer reference and balances",
+          "MCP": "Passes response to Agent (no token exposure)",
+          "Agent": "Normalizes confirmation for Assistant",
+          "Assistant": "Presents success message to the user",
+          "Audit": "Correlates end-to-end trace (auth → consent/step-up → OBO→ MCP→ API → result)"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "Delegation": "Agent acts on behalf of a user with explicit consent and scoped, short-lived tokens. Not impersonation.",
+    "OBO": "On-Behalf-Of token issued to MCP (not to the agent) for a specific user, action, audience, and TTL.",
+    "Operation Handle": "Opaque reference MCP returns to the agent; MCP maps it to a vault entry with OBO + context and injects the token on outbound API calls.",
+    "LoA": "Level of Assurance established at the IdP. Money movement typically requires step-up MFA.",
+    "Idempotency Key": "Client-supplied key to ensure a transfer is executed at most once.",
+    "Scope Minimization": "Constrain capability (transfer), amount (500), resource (checking→savings), audience (Bank API), and TTL (≤120s)."
+  }
+}
