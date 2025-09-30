@@ -1,0 +1,28 @@
+{
+  "name": "agentic-ai-demo",
+  "version": "1.0.0",
+  "description": "Interactive demo for AI agent delegation flows with Ping Identity",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step needed - static files served directly'"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "ping-identity",
+    "mcp",
+    "oauth",
+    "demo"
+  ],
+  "author": "Ping Identity",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "path": "^0.12.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
