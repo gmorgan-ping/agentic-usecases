@@ -106,7 +106,7 @@
       "phase": "auth",
       "chat": {
         "actor": "User",
-        "message": "Move $500 from checking to savings."
+        "message": "Transfer $500 from checking account to savings."
       },
       "swimlane": {
         "activeActors": [
