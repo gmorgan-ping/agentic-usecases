@@ -853,7 +853,7 @@ class InteractiveDemo {
     title.textContent = term;
     content.innerHTML = `
             <div class="glossary-definition">
-                <strong>${term}</strong>
+                <strong >{term}</strong>
                 <p>${this.currentScenario.glossary[term]}</p>
                 <hr class="my-3">
                 <small class="text-muted">
@@ -883,11 +883,11 @@ class InteractiveDemo {
       .sort()
       .map(term => `
         <div class="glossary-definition mb-3">
-          <strong class="text-primary">${term}</strong>
+          <strong class="text-primary ping-red" >${term}</strong>
           <p class="mb-2">${glossary[term]}</p>
         </div>
       `)
-      .join('<hr class="my-2">');
+      .join('');
 
     content.innerHTML = `
       <div class="mb-3">

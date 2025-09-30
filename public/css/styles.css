@@ -36,6 +36,15 @@ body {
   color: white;
 }
 
+.glossary {
+  background-color: var(--ping-blue);
+  color: white;
+}
+
+.ping-red {
+  color: var(--ping-red) !important;
+}
+
 .container-fluid {
   height: 100vh;
   display: flex;
