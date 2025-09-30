@@ -11,6 +11,12 @@
       "file": "bank-transfer.json",
       "title": "Bank Transfer ($500 Checking → Savings)",
       "description": "Secure money transfer with step-up authentication and audit trail"
+    },
+    {
+      "id": "pii-update",
+      "file": "pii-update.json",
+      "title": "Update PII (Email Address)",
+      "description": "Securely update personal information with authentication, consent, and audit"
     }
   ]
 }

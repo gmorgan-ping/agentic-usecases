@@ -1,0 +1,221 @@
+{
+  "meta": {
+    "title": "PII Update — Change Email Address",
+    "description": "User asks an assistant to change their account email. IdP authenticates, PDP requires step-up, STS mints OBO to MCP, agent invokes via handle, and MCP injects the token to the Profile API.",
+    "overview": "A user wants to change the email on their account. Because this is a sensitive PII update, the system authenticates the user, captures explicit consent, enforces step-up MFA via policy, mints a short-lived on-behalf-of token to MCP, and performs a scoped PATCH to the Profile API with full audit.",
+    "vertical": "Financial Services"
+  },
+  "actors": [
+    { "id": "User", "name": "User", "color": "#007bff" },
+    { "id": "Assistant", "name": "AI Assistant (UX)", "color": "#6c757d" },
+    { "id": "Agent", "name": "AI Agent (Executor)", "color": "#28a745" },
+    { "id": "MCP", "name": "Model Context Protocol (Broker/PEP)", "color": "#17a2b8" },
+    { "id": "IdP", "name": "Identity Provider (PingOne Auth)", "color": "#6f42c1" },
+    { "id": "PDP", "name": "Policy Decision Point (PingOne Authorize)", "color": "#fd7e14" },
+    { "id": "STS", "name": "Security Token Service", "color": "#e83e8c" },
+    { "id": "API", "name": "Profile API", "color": "#20c997" },
+    { "id": "Audit", "name": "Audit System", "color": "#ffc107" }
+  ],
+  "phases": [
+    { "id": "overview", "name": "Overview", "description": "Scenario introduction and problem statement" },
+    { "id": "auth", "name": "Authentication", "description": "User proves identity at IdP (LoA)" },
+    { "id": "consent", "name": "Consent & Policy", "description": "User approval; PDP evaluates (may require step-up)" },
+    { "id": "token", "name": "Token (OBO → MCP)", "description": "STS mints on-behalf-of token to MCP; handle to agent" },
+    { "id": "api", "name": "API Access (via MCP)", "description": "Agent invokes via handle; MCP injects token" },
+    { "id": "result", "name": "Result", "description": "Assistant presents outcome to user" }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "This scenario shows how we securely update your account email. We’ll authenticate you, ask for consent, enforce step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and make a scoped update to the Profile API with full audit."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Introduces secure PII change flow and controls"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Please change my email to barbara.jensen@pingidentity.com."
+      },
+      "swimlane": {
+        "activeActors": ["User", "Assistant"],
+        "actions": {
+          "User": "Requests email change (new = barbara.jensen@pingidentity.com)",
+          "Assistant": "Parses intent: update profile email"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "I can help with that. Please sign in with your username and password."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant", "IdP", "Audit"],
+        "actions": {
+          "Assistant": "Redirects to IdP for authentication",
+          "IdP": "Starts auth flow (username/password only)",
+          "Audit": "Logs authentication initiated"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "auth",
+      "chat": {
+        "actor": "system",
+        "message": "You’re signed in."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Completes auth; establishes session (LoA1, acr=pwd, auth_time set)",
+          "Audit": "Logs authentication success (LoA1, acr=pwd)"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Please confirm: update your account email to **barbara.jensen@pingidentity.com**?"
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Requests explicit consent for profile:update:email"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, please proceed."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "PDP", "Audit"],
+        "actions": {
+          "MCP": "Asks PDP to evaluate PII update under current LoA1",
+          "PDP": "Decision: step-up required for PII change (LoA≥2; recent auth_time)",
+          "Audit": "Logs consent captured and PDP step-up requirement"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "For security, please complete MFA to continue."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Executes step-up MFA; raises assurance to LoA2/3 (updates acr/auth_time)",
+          "Audit": "Logs step-up challenge and success"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "consent",
+      "chat": {
+        "actor": "system",
+        "message": "Security check complete. Proceeding…"
+      },
+      "swimlane": {
+        "activeActors": ["PDP"],
+        "actions": {
+          "PDP": "Re-evaluates with higher LoA → PERMIT (scope=profile:update:email)"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission for this update…"
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "STS", "Audit"],
+        "actions": {
+          "MCP": "Requests OBO from STS (aud=Profile API, scope=profile:update:email; ttl≈60–180s)",
+          "STS": "Mints short-lived OBO token **to MCP** (PoP/mTLS bound)",
+          "Audit": "Logs OBO issuance (actor=Agent, subject=User, scope, aud, ttl)"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Authorization prepared."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "Agent"],
+        "actions": {
+          "MCP": "Returns **operation handle** (opaque) to Agent; binds to (user, agent, params, consent)",
+          "Agent": "Prepares invocation using handle (email=barbara.jensen@pingidentity.com)"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "api",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Updating your email securely…"
+      },
+      "swimlane": {
+        "activeActors": ["Agent", "MCP", "API", "Audit"],
+        "actions": {
+          "Agent": "Calls MCP with handle and parameters (new email)",
+          "MCP": "Validates handle/agent/tool; **injects OBO token**; forwards to API",
+          "API": "PATCH /users/{id} { email: barbara.jensen@pingidentity.com } — enforces scope",
+          "Audit": "Logs API call and decision (correlation ID)"
+        }
+      }
+    },
+    {
+      "step": 11,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Your email has been updated to **barbara.jensen@pingidentity.com**. We've sent an email to confirm the change to your account."
+      },
+      "swimlane": {
+        "activeActors": ["API", "MCP", "Agent", "Assistant", "Audit"],
+        "actions": {
+          "API": "Returns 200 + change metadata (ts, actor=agent, verification sent)",
+          "MCP": "Passes response to Agent (no token exposure)",
+          "Agent": "Normalizes confirmation for Assistant",
+          "Assistant": "Presents success message and next steps",
+          "Audit": "Correlates end-to-end trace (auth → consent/step-up → OBO→ MCP→ API → result)"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "Delegation": "Agent acts on behalf of a user with explicit consent and scoped, short-lived tokens. Not impersonation.",
+    "OBO": "On-Behalf-Of token issued to MCP (not to the agent) for a specific user, action, audience, and TTL.",
+    "Operation Handle": "Opaque reference MCP returns to the agent; MCP maps it to a vault entry with OBO + context and injects the token on outbound API calls.",
+    "LoA": "Level of Assurance established at the IdP. PII changes typically require step-up MFA.",
+    "Scope Minimization": "Limit capability (profile:update:email), audience (Profile API), and TTL (≤180s)."
+  }
+}
