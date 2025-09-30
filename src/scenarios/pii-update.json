@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "PII Update — Change Email Address",
+    "title": "PII Update (Change Email Address)",
     "description": "User asks an assistant to change their account email. IdP authenticates, PDP requires step-up, STS mints OBO to MCP, agent invokes via handle, and MCP injects the token to the Profile API.",
     "overview": "A user wants to change the email on their account. Because this is a sensitive PII update, the system authenticates the user, captures explicit consent, enforces step-up MFA via policy, mints a short-lived on-behalf-of token to MCP, and performs a scoped PATCH to the Profile API with full audit.",
     "vertical": "Financial Services"

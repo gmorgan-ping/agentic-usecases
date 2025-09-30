@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Bank Transfer ($500 Checking → Savings)",
+    "title": "Bank Transfer (Checking → Savings)",
     "description": "User asks an assistant to move $500 from checking to savings. IdP authenticates the user, PDP requires step-up, STS mints OBO to MCP, agent invokes via handle, and MCP injects the token to the Bank API.",
     "overview": "A user wants to transfer $500 from their checking account to their savings account. To protect funds, the system must authenticate the user, obtain explicit consent, require step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and execute the transfer through the Bank API while auditing the full chain of events.",
     "vertical": "Banking"

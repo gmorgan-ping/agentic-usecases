@@ -1086,10 +1086,14 @@ class InteractiveDemo {
       const toIndex = actorOrder.indexOf(toActorId);
 
       if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+        // Determine arrow direction based on actor positions
+        const isLeftToRight = fromIndex < toIndex;
+        const arrowSymbol = isLeftToRight ? '→' : '←';
+
         // Create arrow overlay div
         const arrowDiv = document.createElement('div');
         arrowDiv.className = 'handoff-arrow-overlay';
-        arrowDiv.innerHTML = '→';
+        arrowDiv.innerHTML = arrowSymbol;
         arrowDiv.style.position = 'absolute';
         arrowDiv.style.color = '#007bff';
         arrowDiv.style.fontWeight = 'bold';
@@ -1104,8 +1108,12 @@ class InteractiveDemo {
         const fromLeft = (fromIndex + 1) * cellWidth + cellWidth / 2;
         const toLeft = (toIndex + 1) * cellWidth;
 
-        arrowDiv.style.left = `${fromLeft + 2}%`;
-        arrowDiv.style.width = `${Math.abs(toLeft - fromLeft) - 4}%`;
+        // Position arrow based on direction
+        const leftPos = Math.min(fromLeft, toLeft);
+        const rightPos = Math.max(fromLeft, toLeft);
+
+        arrowDiv.style.left = `${leftPos + 2}%`;
+        arrowDiv.style.width = `${rightPos - leftPos - 4}%`;
         arrowDiv.style.textAlign = 'center';
 
         row.appendChild(arrowDiv);

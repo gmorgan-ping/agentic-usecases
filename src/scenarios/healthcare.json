@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "title": "Healthcare (Share Medical Records)",
+    "description": "Patient asks an assistant to share their medical record with a specialist. IdP authenticates the patient, PDP enforces high-assurance policy, STS mints an OBO token to MCP, and the record is shared via the Electronic Health Records (EHR) API with full audit.",
+    "overview": "A patient wants to share their last 12 months of medical history with a specialist. Because this involves sensitive healthcare data and persistent delegation, the system authenticates the patient, requires step-up MFA, captures explicit consent, mints a short-lived on-behalf-of token to MCP, and calls the Electronic Health Records (EHR) API to perform the secure data transfer, all with detailed audit logging.",
+    "vertical": "Healthcare"
+  },
+  "actors": [
+    { "id": "User", "name": "Patient", "color": "#007bff" },
+    { "id": "Assistant", "name": "AI Assistant (UX)", "color": "#6c757d" },
+    { "id": "Agent", "name": "AI Agent (Executor)", "color": "#28a745" },
+    { "id": "MCP", "name": "Model Context Protocol (Broker/PEP)", "color": "#17a2b8" },
+    { "id": "IdP", "name": "Identity Provider (PingOne Auth)", "color": "#6f42c1" },
+    { "id": "PDP", "name": "Policy Decision Point (PingOne Authorize)", "color": "#fd7e14" },
+    { "id": "STS", "name": "Security Token Service", "color": "#e83e8c" },
+    { "id": "API", "name": "Electronic Health Records (EHR) API", "color": "#20c997" },
+    { "id": "Audit", "name": "Audit System", "color": "#ffc107" }
+  ],
+  "phases": [
+    { "id": "overview", "name": "Overview", "description": "Scenario introduction and problem statement" },
+    { "id": "auth", "name": "Authentication", "description": "Patient proves identity at IdP" },
+    { "id": "consent", "name": "Consent & Policy", "description": "Patient approval; PDP evaluates, may require step-up" },
+    { "id": "token", "name": "Token (OBO → MCP)", "description": "STS mints on-behalf-of token to MCP; handle to agent" },
+    { "id": "api", "name": "API Access (via MCP)", "description": "Agent invokes via handle; MCP injects token to the Electronic Health Records (EHR) API" },
+    { "id": "result", "name": "Result", "description": "Assistant presents outcome to patient" }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "This scenario shows how you can securely share your medical records with a specialist. We’ll authenticate you, ask for your consent, enforce step-up MFA, mint a short-lived on-behalf-of token to MCP, and call the Electronic Health Records (EHR) API to transfer your records with full audit."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Introduces secure medical record sharing flow"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Please share my medical records with Dr. Lee."
+      },
+      "swimlane": {
+        "activeActors": ["User", "Assistant"],
+        "actions": {
+          "User": "Requests record sharing (recipient = Dr. Lee, timeframe = last 12 months)",
+          "Assistant": "Parses intent: delegate record access to specialist"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "I can help with that. Please sign in with your username and password."
+      },
+      "swimlane": {
+        "activeActors": ["Assistant", "IdP", "Audit"],
+        "actions": {
+          "Assistant": "Redirects patient to IdP for authentication",
+          "IdP": "Starts auth flow (username/password only)",
+          "Audit": "Logs authentication initiated"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "auth",
+      "chat": {
+        "actor": "system",
+        "message": "You’re signed in."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Completes auth; establishes session (LoA1, acr=pwd)",
+          "Audit": "Logs authentication success (LoA1, acr=pwd, auth_time)"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Please confirm: share your medical records from the past 12 months with **Dr. Lee**?"
+      },
+      "swimlane": {
+        "activeActors": ["Assistant"],
+        "actions": {
+          "Assistant": "Requests explicit consent for record sharing"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, I consent."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "PDP", "Audit"],
+        "actions": {
+          "MCP": "Asks PDP to evaluate record sharing request under LoA1",
+          "PDP": "Decision: step-up required for sharing medical records",
+          "Audit": "Logs consent captured and PDP step-up requirement"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "For security, please complete MFA to continue."
+      },
+      "swimlane": {
+        "activeActors": ["IdP", "Audit"],
+        "actions": {
+          "IdP": "Executes step-up MFA (e.g., OTP, biometric); raises assurance to LoA2/3",
+          "Audit": "Logs step-up challenge and success"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "consent",
+      "chat": {
+        "actor": "system",
+        "message": "Security check complete. Proceeding…"
+      },
+      "swimlane": {
+        "activeActors": ["PDP"],
+        "actions": {
+          "PDP": "Re-evaluates with higher LoA → PERMIT (scope=record:share, recipient=Dr. Lee, timeframe=12 months)"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission to share your records…"
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "STS", "Audit"],
+        "actions": {
+          "MCP": "Requests OBO from STS (aud=EHR API, scope=record:share, recipient=Dr. Lee; ttl≈60–180s)",
+          "STS": "Mints short-lived OBO token **to MCP** (PoP/mTLS bound)",
+          "Audit": "Logs OBO issuance (actor=Agent, subject=Patient, resource=recipient=Dr. Lee)"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Authorization prepared."
+      },
+      "swimlane": {
+        "activeActors": ["MCP", "Agent"],
+        "actions": {
+          "MCP": "Returns **operation handle** (opaque) to Agent; binds to (patient, agent, consent, recipient)",
+          "Agent": "Prepares invocation using handle + context (recipient=Dr. Lee, timeframe=12 months)"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "api",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Sharing your medical records securely through the Electronic Health Records (EHR) API with **Dr. Lee**…"
+      },
+      "swimlane": {
+        "activeActors": ["Agent", "MCP", "API", "Audit"],
+        "actions": {
+          "Agent": "Calls MCP with handle and parameters (recipient=Dr. Lee)",
+          "MCP": "Validates handle/agent/tool; **injects OBO token**; forwards to API",
+          "API": "POST /records/share { timeframe: 12m, recipient: Dr. Lee } — enforces scope/resource",
+          "Audit": "Logs API call and decision (correlation ID)"
+        }
+      }
+    },
+    {
+      "step": 11,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Your records from the past 12 months have been securely shared with **Dr. Lee**. You may revoke this access at any time in your account settings."
+      },
+      "swimlane": {
+        "activeActors": ["API", "MCP", "Agent", "Assistant", "Audit"],
+        "actions": {
+          "API": "Returns 200 + share confirmation",
+          "MCP": "Passes confirmation to Agent",
+          "Agent": "Normalizes confirmation for Assistant",
+          "Assistant": "Presents result and explains revocation option",
+          "Audit": "Correlates end-to-end trace (auth → consent/step-up → OBO→ MCP→ API → result)"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "EHR": "Electronic Health Records. A digital system for storing and sharing a patient's medical history, diagnoses, treatments, lab results, and other clinical information.",
+    "Delegation": "Agent acts on behalf of a patient with explicit consent and scoped, short-lived tokens. Not impersonation.",
+    "OBO": "On-Behalf-Of token issued to MCP (not to the agent) for a specific patient, action, audience, and TTL.",
+    "Operation Handle": "Opaque reference MCP returns to the agent; MCP maps it to a vault entry with OBO + context and injects the token on outbound API calls.",
+    "LoA": "Level of Assurance established at the IdP. Medical record sharing typically requires step-up MFA.",
+    "Scope Minimization": "Constrain scope (record:share), audience (EHR API), recipient (Dr. Lee), and TTL (≤180s)."
+  }
+}
