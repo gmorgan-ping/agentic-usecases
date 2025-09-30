@@ -310,6 +310,22 @@
           "Audit": "Correlates end-to-end trace (auth → consent/step-up → OBO→ MCP→ API → result)"
         }
       }
+    },
+    {
+      "step": 12,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Your $500 transfer has been successfully processed. If you'd like, I can help you review recent transactions or set up a recurring transfer."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Agent"
+        ],
+        "actions": {
+          "Agent": "Confirms successful execution and offers next-step options to the user"
+        }
+      }
     }
   ],
   "glossary": {

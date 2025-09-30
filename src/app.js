@@ -608,8 +608,8 @@ class InteractiveDemo {
     document.getElementById('welcomeActivity').style.display = 'none';
     const activityContainer = document.getElementById('activityContainer');
 
-    // Clear existing activities
-    activityContainer.querySelectorAll('.activity-card, .activity-arrow, .current-phase-info').forEach(el => el.remove());
+    // Clear all existing content except welcome message
+    activityContainer.querySelectorAll(':not(#welcomeActivity)').forEach(el => el.remove());
 
     // Reset scroll position to top
     activityContainer.classList.add('reset-scroll');
@@ -1011,9 +1011,6 @@ class InteractiveDemo {
 
             cellCard.appendChild(actionText);
 
-            // Add badges for special attributes
-            this.addSequenceBadges(cellCard, step, actor.id);
-
             cell.appendChild(cellCard);
           }
 
@@ -1032,8 +1029,7 @@ class InteractiveDemo {
 
     sequenceContainer.appendChild(table);
 
-    // Add legend
-    this.addSequenceLegend(sequenceContainer);
+
 
     // Initialize Bootstrap tooltips
     this.initializeTooltips();
@@ -1052,53 +1048,9 @@ class InteractiveDemo {
     });
   }
 
-  addSequenceBadges(cell, step, actorId) {
-    // Add policy decision badges
-    if (step.policy && step.policy.decision) {
-      const badge = document.createElement('span');
-      badge.className = 'action-badge';
-      badge.textContent = step.policy.decision;
-      badge.style.backgroundColor = step.policy.decision === 'Permit' ? '#28a745' :
-        step.policy.decision === 'Step-up' ? '#ffc107' : '#dc3545';
-      cell.appendChild(badge);
-    }
 
-    // Add token badges
-    if (step.token && step.token.type) {
-      const badge = document.createElement('span');
-      badge.className = 'action-badge';
-      badge.textContent = `${step.token.type}${step.token.holder ? ' → ' + step.token.holder : ''}`;
-      badge.style.backgroundColor = '#17a2b8';
-      cell.appendChild(badge);
-    }
 
-    // Add handle badges
-    if (step.handle && step.handle.id) {
-      const badge = document.createElement('span');
-      badge.className = 'action-badge';
-      badge.textContent = 'Handle';
-      badge.style.backgroundColor = '#6f42c1';
-      cell.appendChild(badge);
-    }
-  }
 
-  addSequenceLegend(container) {
-    const legend = document.createElement('div');
-    legend.className = 'sequence-legend';
-    legend.innerHTML = `
-      <div class="legend-title">Badges</div>
-      <div class="legend-item">
-        <span class="legend-badge" style="background-color: #28a745;">Permit</span>
-        <span class="legend-badge" style="background-color: #ffc107; color: #000;">Step-up</span>
-        <span class="legend-badge" style="background-color: #dc3545;">Deny</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-badge" style="background-color: #17a2b8;">OBO→MCP</span>
-        <span class="legend-badge" style="background-color: #6f42c1;">Handle</span>
-      </div>
-    `;
-    container.appendChild(legend);
-  }
 
   jumpToStepFromSequence(stepIndex) {
     this.currentStep = stepIndex;
