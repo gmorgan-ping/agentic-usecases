@@ -611,6 +611,15 @@ class InteractiveDemo {
     // Clear existing activities
     activityContainer.querySelectorAll('.activity-card, .activity-arrow, .current-phase-info').forEach(el => el.remove());
 
+    // Reset scroll position to top
+    activityContainer.classList.add('reset-scroll');
+    activityContainer.scrollTop = 0;
+    
+    // Remove reset-scroll class after a short delay to re-enable smooth scrolling
+    setTimeout(() => {
+      activityContainer.classList.remove('reset-scroll');
+    }, 100);
+
     const currentStepData = this.currentScenario.timeline[this.currentStep];
     if (!currentStepData || !currentStepData.swimlane) return;
 
