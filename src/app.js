@@ -90,19 +90,49 @@ class InteractiveDemo {
 
   async loadScenarios() {
     try {
-      // Load the claims scenario
-      const response = await fetch('../src/scenarios/claims.json');
+      // Load the scenarios index file
+      const indexResponse = await fetch('../src/scenarios/index.json');
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!indexResponse.ok) {
+        throw new Error(`Failed to load scenarios index: ${indexResponse.status}`);
       }
 
-      const claimsScenario = await response.json();
-      this.scenarios.set('claims', claimsScenario);
+      const scenariosIndex = await indexResponse.json();
+      const loadedScenarios = [];
+
+      // Load each scenario file from the index
+      for (const scenarioInfo of scenariosIndex.scenarios) {
+        try {
+          const response = await fetch(`../src/scenarios/${scenarioInfo.file}`);
+
+          if (response.ok) {
+            const scenarioData = await response.json();
+            this.scenarios.set(scenarioInfo.id, scenarioData);
+            loadedScenarios.push({
+              id: scenarioInfo.id,
+              title: scenarioData.meta?.title || scenarioInfo.title,
+              description: scenarioData.meta?.description || scenarioInfo.description,
+              vertical: scenarioData.meta?.vertical || '',
+              data: scenarioData
+            });
+            console.log(`Loaded scenario: ${scenarioInfo.id} (${scenarioData.meta?.vertical})`);
+          } else {
+            console.warn(`Failed to load ${scenarioInfo.file}: ${response.status}`);
+          }
+        } catch (error) {
+          console.warn(`Error loading ${scenarioInfo.file}:`, error);
+        }
+      }
+
+      if (loadedScenarios.length === 0) {
+        throw new Error('No scenarios could be loaded');
+      }
+
+      console.log(`Successfully loaded ${loadedScenarios.length} scenarios`);
 
       // Wait a bit to ensure DOM is ready
       setTimeout(() => {
-        this.populateScenarioDropdown(claimsScenario);
+        this.populateScenarioDropdown(loadedScenarios);
       }, 100);
 
     } catch (error) {
@@ -111,12 +141,17 @@ class InteractiveDemo {
     }
   }
 
-  populateScenarioDropdown(claimsScenario) {
+  populateScenarioDropdown(scenarios) {
     const selector = document.getElementById('scenarioSelector');
 
     if (!selector) {
       console.error('Scenario selector not found');
       return;
+    }
+
+    // Clear existing options except the default
+    while (selector.options.length > 1) {
+      selector.removeChild(selector.lastChild);
     }
 
     // Ensure we have the default option
@@ -127,11 +162,46 @@ class InteractiveDemo {
       selector.insertBefore(defaultOption, selector.firstChild);
     }
 
-    // Add the claims scenario option
-    const option = document.createElement('option');
-    option.value = 'claims';
-    option.textContent = claimsScenario.meta.title;
-    selector.appendChild(option);
+    // Group scenarios by vertical for better organization
+    const verticals = {};
+    scenarios.forEach(scenario => {
+      const vertical = scenario.vertical || 'General';
+      if (!verticals[vertical]) {
+        verticals[vertical] = [];
+      }
+      verticals[vertical].push(scenario);
+    });
+
+    // Add scenarios, grouped by vertical if multiple verticals exist
+    const verticalKeys = Object.keys(verticals);
+    if (verticalKeys.length > 1) {
+      // Multiple verticals - create option groups
+      verticalKeys.sort().forEach(vertical => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = vertical;
+
+        verticals[vertical].forEach(scenario => {
+          const option = document.createElement('option');
+          option.value = scenario.id;
+          option.textContent = scenario.title;
+          option.title = scenario.description;
+          optgroup.appendChild(option);
+        });
+
+        selector.appendChild(optgroup);
+      });
+    } else {
+      // Single vertical - just add options directly
+      scenarios.forEach(scenario => {
+        const option = document.createElement('option');
+        option.value = scenario.id;
+        option.textContent = scenario.title;
+        option.title = scenario.description;
+        selector.appendChild(option);
+      });
+    }
+
+    console.log(`Populated dropdown with ${scenarios.length} scenarios across ${verticalKeys.length} vertical(s)`);
   }
 
   setupUI() {

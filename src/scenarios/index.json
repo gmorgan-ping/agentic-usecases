@@ -1,0 +1,16 @@
+{
+  "scenarios": [
+    {
+      "id": "claims",
+      "file": "claims.json",
+      "title": "Claims Status Inquiry",
+      "description": "Insurance claim status check with authentication and authorization flow"
+    },
+    {
+      "id": "bank-transfer",
+      "file": "bank-transfer.json",
+      "title": "Bank Transfer ($500 Checking → Savings)",
+      "description": "Secure money transfer with step-up authentication and audit trail"
+    }
+  ]
+}
