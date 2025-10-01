@@ -853,7 +853,7 @@ class InteractiveDemo {
     title.textContent = term;
     content.innerHTML = `
             <div class="glossary-definition">
-                <strong >{term}</strong>
+                <strong >${term}</strong>
                 <p>${this.currentScenario.glossary[term]}</p>
                 <hr class="my-3">
                 <small class="text-muted">
