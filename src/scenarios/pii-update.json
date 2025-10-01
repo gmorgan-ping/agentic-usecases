@@ -180,7 +180,7 @@
       "phase": "api",
       "chat": {
         "actor": "Assistant",
-        "message": "Updating your email securely…"
+        "message": "Updating your email address…"
       },
       "swimlane": {
         "activeActors": ["Agent", "MCP", "API", "Audit"],
