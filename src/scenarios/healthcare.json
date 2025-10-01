@@ -30,7 +30,7 @@
       "phase": "overview",
       "chat": {
         "actor": "Assistant",
-        "message": "This scenario shows how you can securely share your medical records with a specialist. We’ll authenticate you, ask for your consent, enforce step-up MFA, mint a short-lived on-behalf-of token to MCP, and call the Electronic Health Records (EHR) API to transfer your records with full audit."
+        "message": "This scenario shows how you can securely share your medical records with a specialist. We'll authenticate you, ask for your consent, enforce step-up MFA, mint a short-lived on-behalf-of token to MCP, and call the Electronic Health Records (EHR) API to transfer your records with full audit. Click 'Next' to begin."
       },
       "swimlane": {
         "activeActors": ["Assistant"],
@@ -75,7 +75,7 @@
       "phase": "auth",
       "chat": {
         "actor": "system",
-        "message": "You’re signed in."
+        "message": "You're signed in."
       },
       "swimlane": {
         "activeActors": ["IdP", "Audit"],

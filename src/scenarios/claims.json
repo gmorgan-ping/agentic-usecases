@@ -90,7 +90,7 @@
       "phase": "overview",
       "chat": {
         "actor": "Assistant",
-        "message": "Welcome! Let's walk you through an insurance claims status inquiry scenario. A user wants to check the status of their insurance claim. To protect sensitive data, the system must authenticate the user, capture consent, mint a scoped on-behalf-of token, delegate to an AI agent via MCP (Model Context Protocol), and securely access the Claims API while logging all activity for audit compliance."
+        "message": "Welcome! Let's walk you through an insurance claims status inquiry scenario. A user wants to check the status of their insurance claim. To protect sensitive data, the system must authenticate the user, capture consent, mint a scoped on-behalf-of token, delegate to an AI agent via MCP (Model Context Protocol), and securely access the Claims API while logging all activity for audit compliance. Click 'Next' to begin."
       },
       "swimlane": {
         "activeActors": [
@@ -278,7 +278,7 @@
       "phase": "result",
       "chat": {
         "actor": "Assistant",
-        "message": "Your claim CLM-1234 is currently **In Review**. We’ll notify you when there’s an update."
+        "message": "Your claim CLM-1234 is currently **In Review**. We'll notify you when there's an update."
       },
       "swimlane": {
         "activeActors": [

@@ -90,7 +90,7 @@
       "phase": "overview",
       "chat": {
         "actor": "Assistant",
-        "message": "This scenario demonstrates a $500 transfer from checking to savings. We’ll authenticate you, capture consent, require step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and execute the transfer through the Bank API with full audit."
+        "message": "This scenario demonstrates a $500 transfer from checking to savings. We'll authenticate you, capture consent, require step-up MFA per policy, mint a short-lived on-behalf-of token to MCP, and execute the transfer through the Bank API with full audit. Click 'Next' to begin."
       },
       "swimlane": {
         "activeActors": [
@@ -144,7 +144,7 @@
       "phase": "auth",
       "chat": {
         "actor": "system",
-        "message": "You’re signed in."
+        "message": "You're signed in."
       },
       "swimlane": {
         "activeActors": [
