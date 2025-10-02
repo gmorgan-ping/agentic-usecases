@@ -75,18 +75,41 @@
     }
 
     .form-control {
-      border: 2px solid #e9ecef;
-      border-radius: 10px;
+      border: 1px solid #e9ecef;
       padding: 1rem 1.25rem;
       font-size: 1rem;
       transition: all 0.2s ease;
       background: #f8f9fa;
     }
 
+    .form-control {
+      border-radius: 10px;
+    }
+
     .form-control:focus {
       border-color: var(--ping-blue);
       box-shadow: 0 0 0 0.2rem rgba(5, 23, 38, 0.1);
       background: white;
+      outline: none;
+    }
+
+    .password-input-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ping-gray);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      z-index: 10;
+    }
+
+    .password-toggle:hover {
+      color: var(--ping-blue);
     }
 
     .btn-login {
@@ -181,15 +204,18 @@
       <div class="login-header">
         <img src="/images/logo.png" alt="Ping Identity" height="40">
         <h2>Agentic Trust Lab</h2>
-        <p>Secure access required to continue</p>
+        <p>Access required to continue</p>
       </div>
 
       <div class="login-body">
         <form id="loginForm">
           <div class="mb-3">
             <label for="accessCode" class="form-label fw-semibold">Access Code</label>
-            <input type="password" class="form-control" id="accessCode" placeholder="Enter your access code"
-              autocomplete="off" required>
+            <div class="password-input-container">
+              <input type="password" class="form-control" id="accessCode" placeholder="Enter your access code"
+                autocomplete="off" required>
+              <i class="bi bi-eye password-toggle" id="toggleIcon" title="Show/Hide Password"></i>
+            </div>
           </div>
 
           <div id="errorMessage" class="alert alert-danger" style="display: none;">
@@ -231,6 +257,7 @@
       bindEvents() {
         const form = document.getElementById('loginForm');
         const input = document.getElementById('accessCode');
+        const toggleBtn = document.getElementById('toggleIcon');
 
         form.addEventListener('submit', (e) => {
           e.preventDefault();
@@ -240,6 +267,11 @@
         // Clear error message when user starts typing
         input.addEventListener('input', () => {
           this.hideErrorMessage();
+        });
+
+        // Password visibility toggle
+        toggleBtn.addEventListener('click', () => {
+          this.togglePasswordVisibility();
         });
       }
 
@@ -306,6 +338,19 @@
       hideErrorMessage() {
         const errorDiv = document.getElementById('errorMessage');
         errorDiv.style.display = 'none';
+      }
+
+      togglePasswordVisibility() {
+        const input = document.getElementById('accessCode');
+        const icon = document.getElementById('toggleIcon');
+
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.className = 'bi bi-eye-slash password-toggle';
+        } else {
+          input.type = 'password';
+          icon.className = 'bi bi-eye password-toggle';
+        }
       }
     }
 
