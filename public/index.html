@@ -24,16 +24,24 @@
       <div class="row bg-white border-bottom py-3">
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center">
+            <!-- Left: Logo and Title -->
             <a class="navbar-brand d-flex align-items-center" href="/">
               <img src="/images/logo.png" alt="Logo" height="22" class="me-2">
               | <span class="fw-normal site-title ps-2">Agentic Trust Lab</span>
             </a>
-            <div class="d-flex gap-3 align-items-center">
-              <!-- Scenario Selector -->
-              <select id="scenarioSelector" class="form-select form-select-sm" style="width: auto;">
-                <option value="">Select Scenario...</option>
-              </select>
 
+            <!-- Center: Scenario Selector -->
+            <div class="d-flex align-items-center flex-nowrap">
+              <label for="scenarioSelector" class="form-label me-3 mb-0 fw-semibold text-muted text-nowrap">
+                <i class="bi bi-play-circle me-1"></i>Scenario:
+              </label>
+              <select id="scenarioSelector" class="form-select" style="min-width: 300px;">
+                <option value="">Select a scenario to begin...</option>
+              </select>
+            </div>
+
+            <!-- Right: Control Buttons -->
+            <div class="d-flex gap-2 align-items-center">
               <!-- Mode Toggle Buttons -->
               <div class="btn-group" role="group" aria-label="View Mode Toggle">
                 <button id="executiveBtn" class="btn btn-primary btn-sm active" type="button">
@@ -49,6 +57,10 @@
                 <i class="bi bi-book"></i> Glossary
               </button>
 
+              <!-- Logout Button -->
+              <button id="logoutBtn" class="btn btn-outline-secondary btn-sm" type="button" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+              </button>
             </div>
           </div>
         </div>

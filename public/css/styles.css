@@ -45,6 +45,37 @@ body {
   color: var(--ping-red) !important;
 }
 
+/* Enhanced Scenario Selector Styling */
+#scenarioSelector {
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#scenarioSelector:focus {
+  border-color: var(--ping-blue);
+  box-shadow: 0 0 0 0.15rem rgba(5, 23, 38, 0.08);
+  background: white;
+}
+
+#scenarioSelector option {
+  padding: 8px 12px;
+}
+
+#scenarioSelector option:first-child {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Scenario selector label styling */
+.form-label {
+  font-size: 0.9rem;
+  color: var(--ping-gray);
+}
+
 .container-fluid {
   height: 100vh;
   display: flex;

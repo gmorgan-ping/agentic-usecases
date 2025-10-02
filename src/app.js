@@ -70,6 +70,10 @@ class InteractiveDemo {
       this.showFullGlossary();
     });
 
+    bindEvent('logoutBtn', 'click', () => {
+      this.handleLogout();
+    });
+
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (!this.currentScenario) return;
@@ -905,6 +909,29 @@ class InteractiveDemo {
 
   hideGlossary() {
     document.getElementById('glossaryPanel').style.display = 'none';
+  }
+
+  async handleLogout() {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Redirect to login page
+        window.location.href = result.redirectUrl || '/login';
+      } else {
+        this.showError('Logout failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect to login even if API call fails
+      window.location.href = '/login';
+    }
   }
 
   showError(message) {
