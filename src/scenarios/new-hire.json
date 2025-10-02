@@ -1,0 +1,471 @@
+{
+  "meta": {
+    "title": "Workforce (Onboard New Hire: Human → Agent → Agent via Single MCP)",
+    "description": "Onboard new hires with authentication, delegated agents, scoped tokens, and full audit",
+    "overview": "A hiring manager asks to onboard a new employee. The Assistant parses the request and orchestrates two delegated tasks: HR Agent creates the employee in HRIS, then IT Agent provisions baseline access. A single MCP holds tools for both backend systems. The system authenticates the manager, captures explicit consent, enforces step-up MFA where required, mints short-lived on-behalf-of tokens to MCP, returns operation handles to agents, injects tokens at call time, and correlates a full audit trail.",
+    "vertical": "Workforce",
+    "tags": [
+      "delegation",
+      "OBO",
+      "least-privilege",
+      "step-up",
+      "audit",
+      "MCP",
+      "HR",
+      "IT"
+    ]
+  },
+  "actors": [
+    {
+      "id": "User",
+      "name": "Hiring Manager",
+      "color": "#007bff"
+    },
+    {
+      "id": "Assistant",
+      "name": "AI Assistant (UX)",
+      "color": "#6c757d"
+    },
+    {
+      "id": "HR_Agent",
+      "name": "HR Agent (HRIS Executor)",
+      "color": "#28a745"
+    },
+    {
+      "id": "IT_Agent",
+      "name": "IT Agent (Provisioning Executor)",
+      "color": "#20c997"
+    },
+    {
+      "id": "MCP",
+      "name": "Model Context Protocol (Broker/PEP)",
+      "color": "#17a2b8"
+    },
+    {
+      "id": "IdP",
+      "name": "Identity Provider (PingOne Auth)",
+      "color": "#6f42c1"
+    },
+    {
+      "id": "PDP",
+      "name": "Policy Decision Point (PingOne Authorize)",
+      "color": "#fd7e14"
+    },
+    {
+      "id": "STS",
+      "name": "Security Token Service",
+      "color": "#e83e8c"
+    },
+    {
+      "id": "HR_API",
+      "name": "HRIS API",
+      "color": "#7952b3"
+    },
+    {
+      "id": "IT_API",
+      "name": "ITSM/Directory API",
+      "color": "#0dcaf0"
+    },
+    {
+      "id": "Audit",
+      "name": "Audit System",
+      "color": "#ffc107"
+    }
+  ],
+  "mcp": {
+    "id": "MCP",
+    "tools": [
+      {
+        "toolId": "hr.createEmployee",
+        "name": "Create Employee",
+        "audience": "HR_API",
+        "method": "POST",
+        "endpoint": "/employees",
+        "scopes": [
+          "hr:create:employee"
+        ],
+        "resourceTemplate": "employee:{email}",
+        "binding": "mTLS",
+        "ttlSeconds": 120
+      },
+      {
+        "toolId": "it.provisionStandard",
+        "name": "Provision Baseline IT",
+        "audience": "IT_API",
+        "method": "POST",
+        "endpoint": "/provision",
+        "scopes": [
+          "it:provision:standard"
+        ],
+        "resourceTemplate": "employeeId:{employeeId}",
+        "binding": "PoP",
+        "ttlSeconds": 120
+      }
+    ]
+  },
+  "phases": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "description": "Scenario introduction and problem statement"
+    },
+    {
+      "id": "auth",
+      "name": "Authentication",
+      "description": "Manager proves identity at IdP (LoA)"
+    },
+    {
+      "id": "consent",
+      "name": "Consent and Policy",
+      "description": "Manager approval; PDP evaluates and may require step-up"
+    },
+    {
+      "id": "token_hr",
+      "name": "Token for HR Task",
+      "description": "STS mints OBO to MCP for HR create"
+    },
+    {
+      "id": "api_hr",
+      "name": "HR API Access (via MCP)",
+      "description": "HR Agent invokes hr.createEmployee via handle; MCP injects token"
+    },
+    {
+      "id": "delegate_it",
+      "name": "Delegation to IT Agent",
+      "description": "HR Agent passes context to IT Agent"
+    },
+    {
+      "id": "token_it",
+      "name": "Token for IT Task",
+      "description": "STS mints OBO to MCP for IT provision"
+    },
+    {
+      "id": "api_it",
+      "name": "IT API Access (via MCP)",
+      "description": "IT Agent invokes it.provisionStandard via handle; MCP injects token"
+    },
+    {
+      "id": "result",
+      "name": "Result",
+      "description": "Assistant presents onboarding outcome"
+    }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "This scenario onboards a new hire by delegating HR creation and IT provisioning through a single MCP with scoped tokens and full audit. Click Next to begin."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant"
+        ],
+        "actions": {
+          "Assistant": "Introduces HR then IT delegated flow via single MCP"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Onboard Jordan Kim as a Software Engineer starting November 4. Email jordan.kim@example.com."
+      },
+      "swimlane": {
+        "activeActors": [
+          "User",
+          "Assistant"
+        ],
+        "actions": {
+          "User": "Requests onboarding with details",
+          "Assistant": "Parses intent and parameters for HR create then IT provision"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Please sign in to continue."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Redirects manager to IdP",
+          "IdP": "Authenticates manager (LoA1; acr=pwd; sets auth_time)",
+          "Audit": "Logs authentication initiated and success"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Confirm onboarding Jordan Kim (Software Engineer, start Nov 4) and provisioning standard engineering access?"
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant"
+        ],
+        "actions": {
+          "Assistant": "Requests explicit consent with parameters"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, proceed."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "MCP",
+          "PDP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Parses consent and forwards structured intent to MCP",
+          "MCP": "Requests policy evaluation from PDP for HR and IT tasks under current LoA",
+          "PDP": "Decision: HR create permitted at LoA1; IT provisioning requires step-up (LoA≥2; recent auth_time)",
+          "Audit": "Logs consent captured and PDP conditions"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "For security, please complete MFA to proceed with provisioning."
+      },
+      "swimlane": {
+        "activeActors": [
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "IdP": "Executes step-up MFA; raises assurance to LoA2 or LoA3; updates auth_time",
+          "Audit": "Logs step-up challenge and success"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "token_hr",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission for HR creation…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "STS",
+          "Audit"
+        ],
+        "actions": {
+          "MCP": "Requests OBO for tool hr.createEmployee (aud=HR_API, scope=hr:create:employee, resource=employee:jordan.kim@example.com, ttl≈120s, bind=mTLS)",
+          "STS": "Mints short-lived OBO token to MCP",
+          "Audit": "Logs OBO issuance for HR task with correlationId"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "token_hr",
+      "chat": {
+        "actor": "system",
+        "message": "HR authorization prepared."
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "HR_Agent"
+        ],
+        "actions": {
+          "MCP": "Returns operation handle bound to user, agent, consent, constraints, tool=hr.createEmployee",
+          "HR_Agent": "Prepares HR payload { name, email, role, startDate } and idempotencyKey"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "api_hr",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Creating the employee in HR…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "HR_Agent",
+          "MCP",
+          "HR_API",
+          "Audit"
+        ],
+        "actions": {
+          "HR_Agent": "Calls MCP with handle and payload",
+          "MCP": "Validates handle and tool; injects OBO; forwards to HR_API",
+          "HR_API": "POST /employees { name, email, role, startDate } — enforces scope and idempotency",
+          "Audit": "Logs HR API call and decision with correlationId"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "api_hr",
+      "chat": {
+        "actor": "system",
+        "message": "Employee created in HR. EmployeeId: EMP-48291."
+      },
+      "swimlane": {
+        "activeActors": [
+          "HR_API",
+          "MCP",
+          "HR_Agent"
+        ],
+        "actions": {
+          "HR_API": "Returns 201 + employeeId",
+          "MCP": "Passes response to HR_Agent without exposing tokens",
+          "HR_Agent": "Captures employeeId for downstream delegation"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "delegate_it",
+      "chat": {
+        "actor": "HR_Agent",
+        "message": "Requesting IT Agent to provision baseline engineering access for EMP-48291."
+      },
+      "swimlane": {
+        "activeActors": [
+          "HR_Agent",
+          "IT_Agent",
+          "Audit"
+        ],
+        "actions": {
+          "HR_Agent": "Creates a structured delegation request with constraints { employeeId=EMP-48291, package=baseline-engineering }",
+          "IT_Agent": "Accepts request and prepares to invoke MCP",
+          "Audit": "Logs agent to agent delegation event"
+        }
+      }
+    },
+    {
+      "step": 11,
+      "phase": "token_it",
+      "chat": {
+        "actor": "system",
+        "message": "Creating a short-lived permission for IT provisioning…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "STS",
+          "Audit"
+        ],
+        "actions": {
+          "MCP": "Requests OBO for tool it.provisionStandard (aud=IT_API, scope=it:provision:standard, resource=employeeId:EMP-48291, ttl≈120s, bind=PoP)",
+          "STS": "Mints short-lived OBO token to MCP",
+          "Audit": "Logs OBO issuance for IT task with correlationId"
+        }
+      }
+    },
+    {
+      "step": 12,
+      "phase": "token_it",
+      "chat": {
+        "actor": "system",
+        "message": "IT authorization prepared."
+      },
+      "swimlane": {
+        "activeActors": [
+          "MCP",
+          "IT_Agent"
+        ],
+        "actions": {
+          "MCP": "Returns operation handle bound to user, agent, consent, constraints, tool=it.provisionStandard",
+          "IT_Agent": "Prepares call with handle and parameters { employeeId=EMP-48291, packages=['baseline-engineering'] }"
+        }
+      }
+    },
+    {
+      "step": 13,
+      "phase": "api_it",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Provisioning engineering access and accounts…"
+      },
+      "swimlane": {
+        "activeActors": [
+          "IT_Agent",
+          "MCP",
+          "IT_API",
+          "Audit"
+        ],
+        "actions": {
+          "IT_Agent": "Calls MCP with handle and parameters",
+          "MCP": "Validates handle and tool; injects OBO; forwards to IT_API",
+          "IT_API": "POST /provision { employeeId, packages } — enforces scope and constraints",
+          "Audit": "Logs IT API call and decision with correlationId"
+        }
+      }
+    },
+    {
+      "step": 14,
+      "phase": "api_it",
+      "chat": {
+        "actor": "system",
+        "message": "Provisioning complete. Accounts created and baseline groups assigned."
+      },
+      "swimlane": {
+        "activeActors": [
+          "IT_API",
+          "MCP",
+          "IT_Agent"
+        ],
+        "actions": {
+          "IT_API": "Returns 200 + provisioning summary",
+          "MCP": "Passes response to IT_Agent without exposing tokens",
+          "IT_Agent": "Normalizes result for Assistant"
+        }
+      }
+    },
+    {
+      "step": 15,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Onboarding complete for Jordan Kim. HR record EMP-48291 created and baseline engineering access provisioned. I can schedule a day-one checklist or set a reminder to review access in 30 days."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Presents outcome and optional next steps, including revocation or review",
+          "Audit": "Correlates end-to-end trace (auth → consent/step-up → OBO HR → HR_API → delegation → OBO IT → IT_API → result)"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "Delegation": "Assistant acts on behalf of the manager, then delegates sub-tasks to HR_Agent and IT_Agent with explicit consent and scoped, short-lived tokens.",
+    "OBO": "On-Behalf-Of token issued to MCP for a specific user, action, audience, resource, and TTL.",
+    "Operation Handle": "Opaque reference MCP returns to an agent; MCP maps it to stored OBO and context, and injects tokens on outbound API calls.",
+    "Scope Minimization": "Constrain capability (hr:create:employee, it:provision:standard), audience (HR_API, IT_API), resource (EMP-48291), and TTL (≤120s).",
+    "Token Binding": "Proof-of-Possession or mTLS binding prevents token replay.",
+    "Idempotency": "Client-supplied idempotency key ensures create or provision happens at most once."
+  }
+}

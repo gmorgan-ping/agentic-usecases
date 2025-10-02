@@ -23,6 +23,12 @@
       "file": "healthcare.json",
       "title": "Healthcare Record Sharing",
       "description": "Securely share medical records with authentication, consent, and audit"
+    },
+    {
+      "id": "workforce",
+      "file": "new-hire.json",
+      "title": "Workforce Onboarding",
+      "description": "Onboard new hires with authentication, delegated agents, scoped tokens, and audit"
     }
   ]
 }

@@ -182,11 +182,13 @@
       },
       "swimlane": {
         "activeActors": [
+          "Assistant",
           "MCP",
           "PDP",
           "Audit"
         ],
         "actions": {
+          "Assistant": "Parses user's consent ('Yes') and forwards structured intent (read:claims) to MCP",
           "MCP": "Asks PDP: Is LoA sufficient and is read:claims permitted?",
           "PDP": "Evaluates policy → PERMIT (no step-up required for read)",
           "Audit": "Logs consent captured and policy decision"

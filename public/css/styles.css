@@ -118,6 +118,69 @@ body {
   border-bottom-left-radius: 0.25rem;
 }
 
+.chat-message.hr_agent .chat-bubble {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.it_agent .chat-bubble {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.mcp .chat-bubble {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.idp .chat-bubble {
+  background: linear-gradient(135deg, #6f42c1, #59359a);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.pdp .chat-bubble {
+  background: linear-gradient(135deg, #fd7e14, #e8681c);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.sts .chat-bubble {
+  background: linear-gradient(135deg, #e83e8c, #d91a72);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.hr_api .chat-bubble {
+  background: linear-gradient(135deg, #7952b3, #644192);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.it_api .chat-bubble {
+  background: linear-gradient(135deg, #0dcaf0, #0aa2c0);
+  color: white;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.chat-message.audit .chat-bubble {
+  background: linear-gradient(135deg, #ffc107, #ffcd39);
+  color: #212529;
+  margin-right: auto;
+  border-bottom-left-radius: 0.25rem;
+}
+
 .chat-message.system .chat-bubble {
   /* background: linear-gradient(135deg, #ffc107, #e0a800); */
   background: linear-gradient(135deg, var(--yellow-lite), var(--yellow-mid));
@@ -153,6 +216,51 @@ body {
 .chat-message.agent .chat-avatar {
   background: #28a745;
   color: white;
+}
+
+.chat-message.hr_agent .chat-avatar {
+  background: #28a745;
+  color: white;
+}
+
+.chat-message.it_agent .chat-avatar {
+  background: #20c997;
+  color: white;
+}
+
+.chat-message.mcp .chat-avatar {
+  background: #17a2b8;
+  color: white;
+}
+
+.chat-message.idp .chat-avatar {
+  background: #6f42c1;
+  color: white;
+}
+
+.chat-message.pdp .chat-avatar {
+  background: #fd7e14;
+  color: white;
+}
+
+.chat-message.sts .chat-avatar {
+  background: #e83e8c;
+  color: white;
+}
+
+.chat-message.hr_api .chat-avatar {
+  background: #7952b3;
+  color: white;
+}
+
+.chat-message.it_api .chat-avatar {
+  background: #0dcaf0;
+  color: white;
+}
+
+.chat-message.audit .chat-avatar {
+  background: #ffc107;
+  color: #212529;
 }
 
 .chat-message.system .chat-avatar {

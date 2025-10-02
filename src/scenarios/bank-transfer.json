@@ -182,11 +182,13 @@
       },
       "swimlane": {
         "activeActors": [
+          "Assistant",
           "MCP",
           "PDP",
           "Audit"
         ],
         "actions": {
+          "Assistant": "Parses user's consent response ('Yes') and forwards intent to MCP",
           "MCP": "Asks PDP to evaluate transfer ($500 chk→svg) under current LoA1",
           "PDP": "Decision: step-up required for money movement (LoA≥2; recent auth_time)",
           "Audit": "Logs consent captured and PDP step-up requirement"
