@@ -581,12 +581,20 @@ class InteractiveDemo {
     messageDiv.setAttribute('data-step', stepNumber);
     messageDiv.setAttribute('aria-live', 'polite');
 
+    // Get actor color from scenario data
+    const actor = this.currentScenario.actors.find(a => a.id === chat.actor);
+    const actorColor = actor ? actor.color : '#c9d9e7ff'; // fallback color
+
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'chat-avatar';
     avatarDiv.textContent = this.getActorInitials(chat.actor);
+    avatarDiv.style.backgroundColor = actorColor;
+    avatarDiv.style.color = this.getContrastColor(actorColor);
 
     const bubbleDiv = document.createElement('div');
     bubbleDiv.className = 'chat-bubble';
+    bubbleDiv.style.backgroundColor = this.lightenColor(actorColor, 0.9);
+    bubbleDiv.style.borderLeftColor = actorColor;
 
     // Process message content - format first, then add glossary terms
     const formattedMessage = this.formatMessage(chat.message);
@@ -819,6 +827,30 @@ class InteractiveDemo {
   getActorInitials(actorName) {
     if (actorName === 'system') return '⚙️';
     return actorName.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // Color utility functions for dynamic actor colors
+  getContrastColor(hexColor) {
+    // Convert hex to RGB
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Return white for dark colors, black for light colors
+    return luminance > 0.5 ? '#000000' : '#ffffff';
+  }
+
+  lightenColor(hexColor, opacity = 0.1) {
+    // Convert hex to RGB
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    
+    // Return as rgba with specified opacity
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
 
   formatMessage(message) {
