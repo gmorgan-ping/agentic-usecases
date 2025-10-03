@@ -38,7 +38,7 @@
     },
     {
       "id": "PIPs",
-      "name": "PIPs (Risk/Consent/OTP)",
+      "name": "Policy Information Points (Risk/Consent/OTP)",
       "color": "#20c997"
     },
     {
@@ -193,7 +193,25 @@
       "phase": "consent",
       "chat": {
         "actor": "User",
-        "message": "Yes, proceed."
+        "message": "Yes, please proceed."
+      },
+      "swimlane": {
+        "activeActors": [
+          "User",
+          "Assistant"
+        ],
+        "actions": {
+          "User": "Provides explicit consent to perform phone update",
+          "Assistant": "Parses consent ('Yes') and transforms into structured intent (profile.update.phone; new=902-555-1212)"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Submitting the request for policy evaluation."
       },
       "swimlane": {
         "activeActors": [
@@ -203,15 +221,15 @@
           "Audit"
         ],
         "actions": {
-          "Assistant": "Forwards structured intent and consent to Gateway",
-          "Gateway": "Validates request and prepares decision context",
+          "Assistant": "Forwards structured request and consent context to Gateway",
+          "Gateway": "Validates request and builds decision context",
           "PDP": "Evaluates policies; requires step-up and OTP-to-new-number",
-          "Audit": "Logs consent and PDP obligations"
+          "Audit": "Logs structured consent request and PDP obligations"
         }
       }
     },
     {
-      "step": 6,
+      "step": 7,
       "phase": "auth",
       "chat": {
         "actor": "Assistant",
@@ -229,7 +247,7 @@
       }
     },
     {
-      "step": 7,
+      "step": 8,
       "phase": "consent",
       "chat": {
         "actor": "system",
@@ -247,7 +265,7 @@
       }
     },
     {
-      "step": 8,
+      "step": 9,
       "phase": "otp",
       "chat": {
         "actor": "Assistant",
@@ -267,7 +285,7 @@
       }
     },
     {
-      "step": 9,
+      "step": 10,
       "phase": "otp",
       "chat": {
         "actor": "User",
@@ -287,7 +305,7 @@
       }
     },
     {
-      "step": 10,
+      "step": 11,
       "phase": "gateway",
       "chat": {
         "actor": "system",
@@ -305,7 +323,7 @@
       }
     },
     {
-      "step": 11,
+      "step": 12,
       "phase": "token",
       "chat": {
         "actor": "system",
@@ -327,7 +345,7 @@
       }
     },
     {
-      "step": 12,
+      "step": 13,
       "phase": "api",
       "chat": {
         "actor": "Assistant",
@@ -349,7 +367,7 @@
       }
     },
     {
-      "step": 13,
+      "step": 14,
       "phase": "result",
       "chat": {
         "actor": "Assistant",
@@ -383,7 +401,7 @@
     "Assistant": "The conversational AI interface that interprets user intent and orchestrates the flow between identity and policy services.",
     "Agent": "The AI executor that performs the approved task once delegation is granted. It never holds raw tokens.",
     "Gateway": "The Agentic MCP Identity Gateway that enforces policy decisions, applies obligations, issues capability handles, and logs all decisions.",
-    "IdP": "The Identity Provider that authenticates the user and establishes assurance level (e.g., PingOne).",
+    "IdP": "The Identity Provider that authenticates the user and establishes assurance level.",
     "PDP": "The Policy Decision Point that evaluates enterprise policies and returns permit/deny decisions with obligations.",
     "PIPs": "Policy Information Points that provide additional context (risk signals, consent registry, OTP verification, device posture).",
     "MCP": "The Model Context Protocol layer that orchestrates tools/agents and securely custodies tokens. Exchanges handles for per-call OBO tokens.",
