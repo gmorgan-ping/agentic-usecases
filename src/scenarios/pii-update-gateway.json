@@ -371,7 +371,7 @@
       "phase": "result",
       "chat": {
         "actor": "Assistant",
-        "message": "Your phone number has been updated to 902-555-1212. A confirmation was sent to your previous contact method."
+        "message": "Your phone number has been updated to 902-555-1212. A confirmation was sent to your email address."
       },
       "swimlane": {
         "activeActors": [
