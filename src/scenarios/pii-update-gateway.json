@@ -1,0 +1,393 @@
+{
+  "meta": {
+    "title": "PII Update (Change Phone Number) MCP Gateway",
+    "description": "Unauthenticated user asks an assistant to change their phone number to 902-555-1212. IdP authenticates, PDP imposes step-up and OTP-to-new-number. The Gateway enforces policy and issues a capability handle. MCP custodians tokens and injects them to the Profile API. Full audit correlation preserved.",
+    "overview": "Because phone updates are sensitive, the system authenticates the user, captures explicit consent, requires MFA and OTP to the new number, enforces via the Agentic MCP Identity Gateway, mints a short-lived on-behalf-of token to MCP (not the agent), and performs a scoped update with complete audit.",
+    "vertical": "Financial Services"
+  },
+  "actors": [
+    {
+      "id": "User",
+      "name": "User",
+      "color": "#007bff"
+    },
+    {
+      "id": "Assistant",
+      "name": "AI Assistant (UX)",
+      "color": "#6c757d"
+    },
+    {
+      "id": "Agent",
+      "name": "AI Agent (Executor)",
+      "color": "#28a745"
+    },
+    {
+      "id": "Gateway",
+      "name": "Agentic MCP Identity Gateway (PEP)",
+      "color": "#343a40"
+    },
+    {
+      "id": "IdP",
+      "name": "Identity Provider (Auth)",
+      "color": "#6f42c1"
+    },
+    {
+      "id": "PDP",
+      "name": "Policy Decision Point (Policy)",
+      "color": "#fd7e14"
+    },
+    {
+      "id": "PIPs",
+      "name": "PIPs (Risk/Consent/OTP)",
+      "color": "#20c997"
+    },
+    {
+      "id": "MCP",
+      "name": "Model Context Protocol (Orchestrator + Token Custody)",
+      "color": "#17a2b8"
+    },
+    {
+      "id": "API",
+      "name": "Profile API",
+      "color": "#e83e8c"
+    },
+    {
+      "id": "Audit",
+      "name": "Audit System",
+      "color": "#ffc107"
+    }
+  ],
+  "phases": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "description": "Scenario introduction and problem statement"
+    },
+    {
+      "id": "auth",
+      "name": "Authentication",
+      "description": "User proves identity at IdP"
+    },
+    {
+      "id": "consent",
+      "name": "Consent & Policy",
+      "description": "User approval; PDP evaluation"
+    },
+    {
+      "id": "otp",
+      "name": "OTP to New Number",
+      "description": "Out-of-band verification to the new phone"
+    },
+    {
+      "id": "gateway",
+      "name": "Gateway Enforcement",
+      "description": "Gateway enforces policy and issues capability handle"
+    },
+    {
+      "id": "token",
+      "name": "Token (OBO → MCP)",
+      "description": "MCP exchanges handle for short-lived OBO token"
+    },
+    {
+      "id": "api",
+      "name": "API Access (via MCP)",
+      "description": "Agent invokes via handle; MCP injects token"
+    },
+    {
+      "id": "result",
+      "name": "Result",
+      "description": "Assistant presents outcome to user"
+    }
+  ],
+  "timeline": [
+    {
+      "step": 0,
+      "phase": "overview",
+      "chat": {
+        "actor": "Assistant",
+        "message": "This flow securely updates your account phone number. We will authenticate you, request consent, require MFA and an OTP to the new number, authorize a short-lived delegation, and apply the change with full audit."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant"
+        ],
+        "actions": {
+          "Assistant": "Introduces secure phone update process"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "phase": "auth",
+      "chat": {
+        "actor": "User",
+        "message": "Please change my phone number to 902-555-1212."
+      },
+      "swimlane": {
+        "activeActors": [
+          "User",
+          "Assistant"
+        ],
+        "actions": {
+          "User": "Requests phone update (new = 902-555-1212)",
+          "Assistant": "Parses intent: profile.update.phone"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "To continue, please sign in."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Redirects to IdP for authentication",
+          "IdP": "Starts auth flow",
+          "Audit": "Logs authentication initiated"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "phase": "auth",
+      "chat": {
+        "actor": "system",
+        "message": "You are signed in."
+      },
+      "swimlane": {
+        "activeActors": [
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "IdP": "Completes auth; establishes session (LoA1, acr=pwd, auth_time set)",
+          "Audit": "Logs authentication success"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "phase": "consent",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Confirm update of your phone number to 902-555-1212?"
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant"
+        ],
+        "actions": {
+          "Assistant": "Requests explicit consent for profile:update:phone(self)"
+        }
+      }
+    },
+    {
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, proceed."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "Gateway",
+          "PDP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Forwards structured intent and consent to Gateway",
+          "Gateway": "Validates request and prepares decision context",
+          "PDP": "Evaluates policies; requires step-up and OTP-to-new-number",
+          "Audit": "Logs consent and PDP obligations"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "phase": "auth",
+      "chat": {
+        "actor": "Assistant",
+        "message": "For security, please complete MFA."
+      },
+      "swimlane": {
+        "activeActors": [
+          "IdP",
+          "Audit"
+        ],
+        "actions": {
+          "IdP": "Executes step-up MFA; raises assurance to LoA2+ and updates acr/auth_time",
+          "Audit": "Logs step-up challenge and result"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "phase": "consent",
+      "chat": {
+        "actor": "system",
+        "message": "Security check complete. Proceeding."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Gateway",
+          "PDP"
+        ],
+        "actions": {
+          "Gateway": "Resubmits decision request with updated assurance and consent context",
+          "PDP": "Returns PERMIT with obligations (OTP_TO_NEW_NUMBER, MAX_TTL, scope profile:update:phone)"
+        }
+      }
+    },
+    {
+      "step": 8,
+      "phase": "otp",
+      "chat": {
+        "actor": "Assistant",
+        "message": "We sent a one-time code to 902-555-1212. Enter the code to verify this number."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Gateway",
+          "PIPs",
+          "Audit"
+        ],
+        "actions": {
+          "Gateway": "Triggers OTP delivery via PIPs to the new number",
+          "PIPs": "Send and validate OTP",
+          "Audit": "Logs OTP challenge (no PII content)"
+        }
+      }
+    },
+    {
+      "step": 9,
+      "phase": "otp",
+      "chat": {
+        "actor": "User",
+        "message": "The code is 123456."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Gateway",
+          "PIPs",
+          "Audit"
+        ],
+        "actions": {
+          "Gateway": "Submits OTP for verification; records success",
+          "PIPs": "Return verification outcome",
+          "Audit": "Logs OTP verification result"
+        }
+      }
+    },
+    {
+      "step": 10,
+      "phase": "gateway",
+      "chat": {
+        "actor": "system",
+        "message": "Authorization window created for the requested update."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Gateway",
+          "Audit"
+        ],
+        "actions": {
+          "Gateway": "Issues capability handle (opaque) bound to user, agent, purpose, scope, TTL, consentId, policyVersion",
+          "Audit": "Logs handle issuance and decisionId"
+        }
+      }
+    },
+    {
+      "step": 11,
+      "phase": "token",
+      "chat": {
+        "actor": "system",
+        "message": "Preparing delegated access for execution."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Agent",
+          "MCP",
+          "Gateway",
+          "Audit"
+        ],
+        "actions": {
+          "Agent": "Requests execution via MCP with handle and parameters (902-555-1212)",
+          "MCP": "Validates handle and agent; requests per-call token from Gateway",
+          "Gateway": "Issues short-lived OBO token to MCP only (aud=API, scope=profile:update:phone, TTL≤120s)",
+          "Audit": "Logs OBO issuance correlated to handle and decision"
+        }
+      }
+    },
+    {
+      "step": 12,
+      "phase": "api",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Updating your phone number now."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Agent",
+          "MCP",
+          "API",
+          "Audit"
+        ],
+        "actions": {
+          "Agent": "Calls MCP to perform update using handle",
+          "MCP": "Injects OBO token on outbound call",
+          "API": "PATCH /users/{id}/phone { phone: 902-555-1212 } — validates scope, TTL, field constraint",
+          "Audit": "Logs API call outcome with correlation ID"
+        }
+      }
+    },
+    {
+      "step": 13,
+      "phase": "result",
+      "chat": {
+        "actor": "Assistant",
+        "message": "Your phone number has been updated to 902-555-1212. A confirmation was sent to your previous contact method."
+      },
+      "swimlane": {
+        "activeActors": [
+          "API",
+          "MCP",
+          "Agent",
+          "Assistant",
+          "Audit"
+        ],
+        "actions": {
+          "API": "Returns 200 with change metadata",
+          "MCP": "Passes response to Agent without exposing tokens",
+          "Agent": "Normalizes confirmation payload",
+          "Assistant": "Presents success and next steps",
+          "Audit": "Stores immutable end-to-end record"
+        }
+      }
+    }
+  ],
+  "glossary": {
+    "Capability Handle": "An opaque reference created by the Gateway that represents a specific delegated right (scope, TTL, purpose). The handle is safe for the agent to hold, while the actual token stays in MCP custody.",
+    "Delegation": "The process where an agent executes an action on behalf of a user with explicit consent and policy enforcement, using short-lived, scoped rights.",
+    "OBO": "On-Behalf-Of token issued to MCP (not directly to the agent). It is time-limited and bound to the specific user, action, and audience.",
+    "LoA": "Level of Assurance established by the IdP during authentication. Sensitive updates (like PII changes) typically require step-up MFA to raise assurance.",
+    "Scope Minimization": "Limiting delegated rights to the narrowest possible scope (e.g., profile:update:phone), audience (Profile API), and TTL (≤120s).",
+    "User": "The end customer using a browser or client application who requests an action (e.g., update phone number).",
+    "Assistant": "The conversational AI interface that interprets user intent and orchestrates the flow between identity and policy services.",
+    "Agent": "The AI executor that performs the approved task once delegation is granted. It never holds raw tokens.",
+    "Gateway": "The Agentic MCP Identity Gateway that enforces policy decisions, applies obligations, issues capability handles, and logs all decisions.",
+    "IdP": "The Identity Provider that authenticates the user and establishes assurance level (e.g., PingOne).",
+    "PDP": "The Policy Decision Point that evaluates enterprise policies and returns permit/deny decisions with obligations.",
+    "PIPs": "Policy Information Points that provide additional context (risk signals, consent registry, OTP verification, device posture).",
+    "MCP": "The Model Context Protocol layer that orchestrates tools/agents and securely custodies tokens. Exchanges handles for per-call OBO tokens.",
+    "API": "The protected enterprise resource (Profile API in this case) where the actual data update occurs.",
+    "Audit": "The logging and observability system that records all events across authentication, consent, delegation, enforcement, and API access."
+  }
+}

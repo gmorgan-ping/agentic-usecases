@@ -174,28 +174,27 @@
       }
     },
     {
-  "step": 5,
-  "phase": "consent",
-  "chat": {
-    "actor": "User",
-    "message": "Yes, please proceed."
-  },
-  "swimlane": {
-    "activeActors": [
-      "Assistant",
-      "MCP",
-      "PDP",
-      "Audit"
-    ],
-    "actions": {
-      "Assistant": "Parses user's consent ('Yes') and forwards structured intent to MCP",
-      "MCP": "Asks PDP to evaluate PII update under current LoA1",
-      "PDP": "Decision: step-up required for PII change (LoA≥2; recent auth_time)",
-      "Audit": "Logs consent captured and PDP step-up requirement"
-    }
-  }
-}
-,
+      "step": 5,
+      "phase": "consent",
+      "chat": {
+        "actor": "User",
+        "message": "Yes, please proceed."
+      },
+      "swimlane": {
+        "activeActors": [
+          "Assistant",
+          "MCP",
+          "PDP",
+          "Audit"
+        ],
+        "actions": {
+          "Assistant": "Parses user's consent ('Yes') and forwards structured intent to MCP",
+          "MCP": "Asks PDP to evaluate PII update under current LoA1",
+          "PDP": "Decision: step-up required for PII change (LoA≥2; recent auth_time)",
+          "Audit": "Logs consent captured and PDP step-up requirement"
+        }
+      }
+    },
     {
       "step": 6,
       "phase": "auth",

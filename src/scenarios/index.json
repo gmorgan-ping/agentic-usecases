@@ -19,6 +19,12 @@
       "description": "Securely update personal information with authentication, consent, and audit"
     },
     {
+      "id": "pii-update-gateway",
+      "file": "pii-update-gateway.json",
+      "title": "Update PII (Phone Number) Gateway",
+      "description": "Securely update personal information with authentication, consent, and audit"
+    },
+    {
       "id": "healthcare",
       "file": "healthcare.json",
       "title": "Healthcare Record Sharing",
