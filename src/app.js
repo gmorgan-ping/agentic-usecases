@@ -1033,11 +1033,8 @@ class InteractiveDemo {
     stepHeader.innerHTML = 'Steps';
     headerRow.appendChild(stepHeader);
 
-    // Actor columns in exact order specified
-    const actorOrder = ['User', 'Assistant', 'Agent', 'MCP', 'IdP', 'PDP', 'STS', 'API', 'Audit'];
-    actorOrder.forEach(actorId => {
-      const actor = this.currentScenario.actors.find(a => a.id === actorId);
-      if (actor) {
+    // Use all actors from the current scenario in the order they are defined
+    this.currentScenario.actors.forEach(actor => {
         const th = document.createElement('th');
         th.className = 'actor-column-header';
         th.style.borderTop = `3px solid ${actor.color}`;
@@ -1050,7 +1047,6 @@ class InteractiveDemo {
           </div>
         `;
         headerRow.appendChild(th);
-      }
     });
     table.appendChild(headerRow);
 
@@ -1082,9 +1078,7 @@ class InteractiveDemo {
       row.appendChild(stepCell);
 
       // Actor cells for this step
-      actorOrder.forEach(actorId => {
-        const actor = this.currentScenario.actors.find(a => a.id === actorId);
-        if (actor) {
+      this.currentScenario.actors.forEach(actor => {
           const cell = document.createElement('td');
           cell.className = 'actor-step-cell';
           cell.style.cursor = 'pointer';
@@ -1126,12 +1120,11 @@ class InteractiveDemo {
 
           // Always append the cell to the row, whether active or not
           row.appendChild(cell);
-        }
       });
 
       // Add arrows for hand-offs if multiple actors are active
       if (step.swimlane && step.swimlane.activeActors.length > 1) {
-        this.addHandoffArrows(row, step.swimlane.activeActors, actorOrder);
+        this.addHandoffArrows(row, step.swimlane.activeActors, this.currentScenario.actors);
       }
 
       table.appendChild(row);
@@ -1184,7 +1177,7 @@ class InteractiveDemo {
     }
   }
 
-  addHandoffArrows(row, activeActors, actorOrder) {
+  addHandoffArrows(row, activeActors, actors) {
     // Create connecting arrows between active actor cells
     row.style.position = 'relative';
 
@@ -1192,8 +1185,8 @@ class InteractiveDemo {
       const fromActorId = activeActors[i];
       const toActorId = activeActors[i + 1];
 
-      const fromIndex = actorOrder.indexOf(fromActorId);
-      const toIndex = actorOrder.indexOf(toActorId);
+      const fromIndex = actors.findIndex(a => a.id === fromActorId);
+      const toIndex = actors.findIndex(a => a.id === toActorId);
 
       if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
         // Determine arrow direction based on actor positions
@@ -1214,7 +1207,7 @@ class InteractiveDemo {
         arrowDiv.style.transform = 'translateY(-50%)';
 
         // Calculate position based on cell indices (accounting for step column)
-        const cellWidth = 100 / (actorOrder.length + 1); // +1 for step column
+        const cellWidth = 100 / (actors.length + 1); // +1 for step column
         const fromLeft = (fromIndex + 1) * cellWidth + cellWidth / 2;
         const toLeft = (toIndex + 1) * cellWidth;
 
